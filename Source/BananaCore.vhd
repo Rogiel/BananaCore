@@ -6,9 +6,13 @@
 --
 
 library BananaCore;
-use BananaCore.Adder;
+
 use BananaCore.InstructionDecoder;
 use BananaCore.Instruction.DecodedInstruction;
+
+use BananaCore.Numeric.Word;
+
+use BananaCore.ULA;
 
 -- Implements the processor entry point
 entity BananaCore is
@@ -33,9 +37,8 @@ architecture BananaCoreImpl of BananaCore is
 	-- a signal holding the instruction that is currently being executed by the processor
 	signal current_instruction : DecodedInstruction;
 	
-	-- a temporary static instruction data
-	signal instruction_data : bit_vector(7 downto 0) := "00000000";
-
+	signal output_transform : Word(DataWidth-1 downto 0);
+	
 begin
 
 	instruction_decoder: InstructionDecoder
@@ -43,20 +46,23 @@ begin
 		DataWidth => DataWidth
 	)
 	port map(
-		instruction_byte => instruction_data,
+		instruction_byte => "00000000",
 		instruction => current_instruction
 	);
 
-	my_adder: Adder
+	my_ula: ULA
 	generic map(
 		N => DataWidth
 	)
 	port map(
-		a => port0,
-		b => port1,
+		a => Word(port0),
+		b => Word(port1),
 		carry_in => '0',
 					
-		output => port2
+		output => output_transform,
+		operation_selection => port1(0)
 	);
+	
+	port2 <= bit_vector(output_transform);
 
 end BananaCoreImpl;
