@@ -1,0 +1,8 @@
+# Ignore Quartus II backup files
+*.bak
+
+# Ignore Quartus II output & database files
+db/
+incremental_db/
+db/
+output_files/
