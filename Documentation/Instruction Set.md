@@ -7,15 +7,20 @@ The load instruction is used to copy data from a arbitrary memory location into 
 |Address (bit)| Description|Usage example|Example description
 |-------------|---------------|-----------|-----------
 |0-8|Opcode|0000 0000|(constant)
-|9-12|Source address configuration|0000|Loads the data from a memory address
-                                  |0001|Loads the data from anotherinternal register (ignores bits 17 to 24)
-                                  |0010|Loads a constant 
+|9-12|Source address configuration
 |13-16|Destination register|0000|Stores the fetched data into register 0
 |17-32|Source address|(16-bit address)|The address to read the register data from
+> Source Address configuration:
+
+>0000 Loads the data from a memory address
+
+>0001 Loads the data from another internal register
+
+>0010 Loads a constant 
 
 ### STORE
 The store instruction is used to copy data from a register into a arbitraty address in memory
-##i think that the destination address configuration is not necessary 
+
 
 |Address (bit)| Description|Usage example|Example description
 |-------------|---------------|-----------|-----------
@@ -23,6 +28,13 @@ The store instruction is used to copy data from a register into a arbitraty addr
 |9-12|Destination address configuration|0000|Stores the data into a memory address
 |13-16|Source register|0000|Gets the data from register 0
 |17-32|Destination address|(16-bit address)|To the given address
+
+> Source Address configuration:
+
+>0000 Stores data ina a memory address
+
+>0001 Stores data in another internal register
+
 
 ### NOT CARRY BIT
 Unset the carry bit of the CONTROL register
