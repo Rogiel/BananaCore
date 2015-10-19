@@ -1,9 +1,9 @@
-# Blocs Specifications
-##Basic Blocs
+# Blocks Specifications
+##Basic Blocks
 
 ###REG
 ####Description
-This bloc will work as a flipflop with an enable in it's input and another in it's output (when the output enable is '1' the output should be high impedance)
+This block will work as a flipflop with an enable in it's input and another in it's output (when the output enable is '1' the output should be high impedance)
 
 ####Interfaces
 |Name       |In/Out|Type                           |
@@ -48,7 +48,7 @@ The variables eOut and CTRL control how the ULA will work instantaneously (indep
 
 >If the value of the operation is bigger than N bits **Out** will truncate the valeu to the first N bits and the **OV** will be '1', otherwise **OV** will be '0'
 
-##Composed Blocs
+##Composed Blocks
 ###ULAREG
 ####Description
 This block will be an **ULA** with a **REG** conected in each of it's entrances
