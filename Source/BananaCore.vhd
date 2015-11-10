@@ -14,6 +14,8 @@ use BananaCore.Numeric.Word;
 
 use BananaCore.ULA;
 
+use BananaCore.Reg;
+
 -- Implements the processor entry point
 entity BananaCore is
 	generic(
@@ -30,7 +32,6 @@ entity BananaCore is
 		-- io port: port2
 		port2: inout bit_vector(DataWidth-1 downto 0)
 	);
-	
 end BananaCore;
 
 architecture BananaCoreImpl of BananaCore is

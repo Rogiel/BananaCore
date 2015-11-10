@@ -1,0 +1,12 @@
+what,kind,bundleId,bundleVersion,description,time
+stopped,bundle,org.eclipse.rse.subsystems.processes.shell.linux,1.1.300.v201101042155,"org.eclipse.rse.subsystems.processes.shell.linux",1447191430018
+stopped,bundle,org.eclipse.rse.subsystems.processes.core,3.1.200.v201101042155,"org.eclipse.rse.subsystems.processes.core",1447191430018
+stopped,bundle,org.eclipse.rse.terminals.ui,1.1.0.v201101042155,"org.eclipse.rse.terminals.ui",1447191430018
+stopped,bundle,org.eclipse.rse.ui,3.2.1.R33x_v201109141647,"org.eclipse.rse.ui",1447191430018
+stopped,bundle,org.eclipse.ui.console,3.5.100.v20111007_r372,"org.eclipse.ui.console",1447191430018
+stopped,bundle,org.eclipse.mylyn.commons.ui,3.6.1.v20110720-0100,"org.eclipse.mylyn.commons.ui",1447191430018
+stopped,bundle,org.eclipse.ui.editors,3.7.0.v20110928-1504,"org.eclipse.ui.editors",1447191430018
+stopped,bundle,org.eclipse.ui.workbench.texteditor,3.7.0.v20110928-1504,"org.eclipse.ui.workbench.texteditor",1447191430018
+stopped,bundle,org.eclipse.compare.core,3.5.200.I20110208-0800,"org.eclipse.compare.core",1447191430018
+stopped,bundle,org.eclipse.rse.services.dstore,3.1.201.R33x_v201106291530,"org.eclipse.rse.services.dstore",1447191430018
+stopped,bundle,org.eclipse.dstore.core,3.3.1.R33x_v201107181530,"org.eclipse.dstore.core",1447191430018
