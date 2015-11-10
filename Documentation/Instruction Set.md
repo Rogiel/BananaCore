@@ -201,16 +201,6 @@ Jumps the program counter register into a arbitrary address
 |0-8|Opcode|0010 0000|(constant)
 |9-24|Destination address|(16-bit address)|Jumps the program into the given address
 
-### JUMP\_CONDITIONAL
-Jumps the program counter register into a arbitrary address only if the register selected is not zero
-## this function is not necessary since there is a redundant with the jump if carry
-|Address (bit)| Description|Usage example|Example description
-|-------------|---------------|-----------|-----------
-|0-8|Opcode|0010 0001|(constant)
-|9-12|(ignored)|-----|-----
-|13-16|The comparision register|0001|Checks if the register 1 is not equal to zero
-|17-32|Destination address|(16-bit address)|if not equal, jumps the the given address
-
 ### JUMP\_IF\_CARRY
 Jumps the program counter register into a arbitrary address only if the carry bit is set in the CONTROL register. If the carry bit is not set, the flow contiues normally.
 
@@ -227,6 +217,13 @@ Halts the processor and prevents any instruction from further execution
 |Address (bit)| Description|Usage example|Example description
 |-------------|---------------|-----------|-----------
 |0-8|Opcode|1111 1110|(constant)
+
+### RESET
+Resets the processor to its initial state.
+
+|Address (bit)| Description|Usage example|Example description
+|-------------|---------------|-----------|-----------
+|0-8|Opcode|1111 1101|(constant)
 
 ### DEBUG (Virtual Machine only)
 Prints a debug string into the virtual machine console. This instruction is only implemented in a VM environment and on hardware is equivalent to a NOOP.
