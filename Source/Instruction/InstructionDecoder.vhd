@@ -33,6 +33,30 @@ begin
    instruction.opcode <=
 		HALT when "00000000",
 		JUMP when "00000001",
+		-- HALT and JUMP must be changed?
+		--LOAD when "00000000",
+		-- STORE when "00000001",
+		-- Arithmetic Instructions 
+		ADD when "00010000",
+		SUBTRACT when "00010001",
+		MULTIPLY when "00010010",
+		DIVIDE when "00010011",
+		-- Logic Instructions
+		BITWISEAND when "01000000",
+		BITWISEOR when "01000001",
+		BITWISENAND when "01000010",
+		BITWISENOR when "01000011",
+		BITWISEXOR when "01000100",
+		BITWISENOT when "01000101',
+		-- Comparision Instructions
+		GREATERTHAN when "00110000",
+		GREATEROREQUALTHAN "00110001",
+		
+		
+		
+		
+		
+		
 		HALT when others;
 	
 
