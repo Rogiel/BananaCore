@@ -22,8 +22,9 @@ entity InstructionDecoder is
 		
 		-- the resulting decoded instruction
 		-- 24 bits from JUMP instruction plus 16 bits from destination address
+		instruction: out DecodedInstruction;
 		instruction: out bit_vector(39 downto 0); 
-	);
+	)
 	
 end InstructionDecoder;
 
