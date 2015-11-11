@@ -31,11 +31,10 @@ begin
 
 	with instruction_byte select
    instruction.opcode <=
-		HALT when "00000000",
-		JUMP when "00000001",
-		-- HALT and JUMP must be changed?
-		--LOAD when "00000000",
-		-- STORE when "00000001",
+		-- Memory Control instructions
+		LOAD when "00000000",
+		STORE when "00000001",
+		NOTCARRYBIT when "00000010",
 		-- Arithmetic Instructions 
 		ADD when "00010000",
 		SUBTRACT when "00010001",
@@ -50,13 +49,17 @@ begin
 		BITWISENOT when "01000101',
 		-- Comparision Instructions
 		GREATERTHAN when "00110000",
-		GREATEROREQUALTHAN "00110001",
-		
-		
-		
-		
-		
-		
+		GREATEROREQUALTHAN when "00110001",
+		LESSTHAN when "00110010",
+		LESSOREQUALTHAN when "00110011",
+		EQUAL when "00110100",
+		NOTEQUAL when  "0011 0101",
+		-- Flow Control Instructions
+		JUMP when "00100000",
+		JUMPIFCARRY when "00100010",
+		-- Processor Control Instructions
+		HALT when "11111110",
+		RESET when "11111101",
 		HALT when others;
 	
 
