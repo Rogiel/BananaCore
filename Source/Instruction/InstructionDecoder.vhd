@@ -18,10 +18,11 @@ entity InstructionDecoder is
 	);
 	port(
 		-- the instruction input byte
-		instruction_byte: in  bit_vector(7 downto 0);
+		instruction_data: in  bit_vector(23 downto 0);
 		
 		-- the resulting decoded instruction
-		instruction: out DecodedInstruction
+		-- 24 bits from JUMP instruction plus 16 bits from destination address
+		instruction: out bit_vector(39 downto 0); 
 	);
 	
 end InstructionDecoder;
