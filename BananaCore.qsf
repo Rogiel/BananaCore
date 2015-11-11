@@ -54,4 +54,7 @@ set_global_assignment -name VHDL_FILE Source/Instruction/InstructionDecoder.vhd
 set_global_assignment -name VHDL_FILE Source/Arithmetic/Subtracter.vhd
 set_global_assignment -name VHDL_FILE Source/Numeric.vhd
 set_global_assignment -name VHDL_FILE Source/Arithmetic/ULA.vhd
+set_global_assignment -name VHDL_FILE Source/Memory/MemoryController.vhd
+set_global_assignment -name VHDL_FILE Source/Memory/MemoryBank.vhd
+set_global_assignment -name VHDL_FILE Source/ClockController.vhd
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
