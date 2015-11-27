@@ -44,7 +44,7 @@ architecture MemoryBankImpl of MemoryBank is
    signal storage : MemoryBankStorage;
 
 begin process (clock) begin
-	if clock'event and clock = '1' and selector = '1' then
+	if clock'event and clock = '1' then
 		if selector = '1' then
 			case operation is
 				when OP_READ  => memory_data <= storage(to_integer(address));
