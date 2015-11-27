@@ -7,7 +7,7 @@
 
 library IEEE;
 use ieee.std_logic_1164.all;
-use ieee.numeric_bit.all;
+use ieee.numeric_std.all;
 
 library BananaCore;
 use BananaCore.Memory.all;
@@ -33,7 +33,10 @@ entity MemoryBank is
 		selector: in bit;
 				
 		-- the operation to perform on the memory
-		operation: in MemoryOperation
+		operation: in MemoryOperation;
+		
+		-- a flag indicating that a operation has completed
+		ready: out std_logic
 	);
 	
 end MemoryBank;
@@ -47,11 +50,16 @@ begin process (clock) begin
 	if clock'event and clock = '1' then
 		if selector = '1' then
 			case operation is
-				when OP_READ  => memory_data <= storage(to_integer(address));
-				when OP_WRITE => storage(to_integer(address)) <= memory_data;
+				when OP_READ  => 
+					memory_data <= storage(to_integer(address));
+					ready <= '1';
+				when OP_WRITE => 
+					storage(to_integer(address)) <= memory_data;
+					ready <= '1';
 			end case;
 		else 
 			memory_data <= (others => 'Z');
+			ready <= 'Z';
 		end if;
 	end if;
 end process;

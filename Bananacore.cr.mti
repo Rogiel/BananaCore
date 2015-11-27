@@ -1,0 +1,9 @@
+Y:/BananaCore/Source/Register.vhd {1 {vcom -work cycloneii -2002 -explicit Y:/BananaCore/Source/Register.vhd
+Model Technology ModelSim ALTERA vcom 10.1b Compiler 2012.04 Apr 27 2012
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Compiling entity reg
+-- Compiling architecture archi of reg
+
+} {} {}}

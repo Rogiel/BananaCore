@@ -6,8 +6,9 @@
 --
 
 library ieee;
-use ieee.numeric_bit.all;
+use ieee.numeric_std.all;
 use ieee.std_logic_1164.all;
+use ieee.std_logic_1164.std_logic;
 
 library BananaCore;
 use BananaCore.Core.all;
@@ -26,10 +27,27 @@ package Memory is
 	
 	-- Represents a data
 	subtype MemoryData is std_logic_vector(7 downto 0);
+	
+	function integer_to_memory_address(address : integer) return MemoryAddress;
+	function bits_to_memory_address(address : std_logic_vector(DataWidth-1 downto 0)) return MemoryAddress;
 end package Memory;
 
+package body Memory is
+	function integer_to_memory_address(address : integer)
+	return MemoryAddress is begin
+		return to_unsigned(address, DataWidth);
+	end integer_to_memory_address;
+	
+	function bits_to_memory_address(address : std_logic_vector(DataWidth-1 downto 0))
+	return MemoryAddress is begin
+		return to_unsigned(to_integer(unsigned(address)), DataWidth);
+	end bits_to_memory_address;
+end Memory;
+
 library ieee;
-use ieee.numeric_bit.all;
+use ieee.numeric_std.all;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_1164.std_logic;
 
 library BananaCore;
 use BananaCore.Memory.all;
@@ -49,14 +67,17 @@ entity MemoryController is
 		memory_data: inout MemoryData;
 		
 		-- the operation to perform on the memory
-		operation: in MemoryOperation
+		operation: in MemoryOperation;
+		
+		-- a flag indicating that a operation has completed
+		ready: out std_logic
 	);
 	
 end MemoryController;
 
 architecture MemoryControllerImpl of MemoryController is
 	-- a delimiter that sets whenever the memory returned should switch to being IO
-	constant IO_MAPPING_DELIMITER : MemoryAddress := "11111111111111111111111100000000";
+	constant IO_MAPPING_DELIMITER : MemoryAddress := "1111111100000000";
 	
 	-- the memory bank selector (enables the memory bank)
 	signal memory_bank_selector : bit;
@@ -68,7 +89,8 @@ begin
 		address => address,
 		memory_data => memory_data,
 		selector => memory_bank_selector,
-		operation => operation
+		operation => operation,
+		ready => ready
 	);
 
 	process (clock) begin

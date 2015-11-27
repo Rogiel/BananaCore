@@ -8,17 +8,17 @@ This block will work as a flipflop with an enable in it's input and another in i
 ####Interfaces
 |Name       |In/Out|Type                           |
 |-----------|------|-------------------------------|
-|**In**     |In    |std_logic _vector (N downto 0)  |
+|**portIn**     |In    |word (N downto 0)  |
 |**eIn**    |In    |std_logic                      |
 |**eOut**   |In    |std_logic                      |
 |**RST**    |In    |std_logic                      |
 |**CLK**    |In    |std_logic                      |
-|**Out**    |Out   |std_logic _vector (N downto 0)  |
+|**portOut**    |Out   |word (N downto 0)  |
 
 ####Workings
 The variables eIn, eOut and RST control how the register will work in each clock cycle (each time **CLK** changes from '0' to '1') as follows in decrescent order of priority.
 
-1.	If **eOut** is '1', **Out** will assume the value 'Z' (high impedance) in all bits.
+1.	If **eOut** is '0', **Out** will assume the value 'Z' (high impedance) in all bits.
 2. If **RST** is '1', **Out** will assume the value '0' in all bits.
 3. If **eIn** is '1', **Out** will copy the value in In.
 4. If **eIn** is '0', **Out** will not change it's value.

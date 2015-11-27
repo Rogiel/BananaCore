@@ -7,6 +7,8 @@
 
 library BananaCore;
 
+use BananaCore.Memory.all;
+
 package Instruction is
 
 	-- Represents a instruction by name
@@ -50,5 +52,14 @@ package Instruction is
 		opcode: InstructionCode;
 		-- The instruction size
 		size: integer;
+		
+		-- the first register to operate on
+		reg0: integer;
+		
+		-- the second register to operate on
+		reg1: integer;
+		
+		-- the memory address to operate on
+		address: MemoryAddress;
 	end record;
 end package;

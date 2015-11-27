@@ -22,7 +22,7 @@ architecture ClockControllerImpl of ClockController is
 begin
 	
 	-- FIXME use a real hardware clock source
-	clock <= '1' after 0.5 ns when clock = '0' and enable = '1' else
-				'0' after 0.5 ns when clock = '1' and enable = '1';
+	clock <= '1' after 0.5 ms when clock = '0' and enable = '1' else
+				'0' after 0.5 ms when clock = '1' and enable = '1';
 
 end ClockControllerImpl;
