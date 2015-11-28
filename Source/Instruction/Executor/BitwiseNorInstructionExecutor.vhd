@@ -118,6 +118,7 @@ begin
 						-- TODO implement instruction here
 						result <= not (arg0 or arg1);
 						state <= store_result;
+						register_data <= result;
 
 					when store_result =>
 						register_address <= AccumulatorRegister;

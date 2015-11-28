@@ -117,10 +117,11 @@ begin
 					when execute =>
 						-- TODO check instruction here
 						if arg0 > arg1 then
-						result <= '1';
+							result <= '1';
 						else
-						result <= '0';
-						state <= store_result;
+							result <= '0';
+						end if;
+							state <= store_result;
 
 					when store_result =>
 						register_address <= AccumulatorRegister;
