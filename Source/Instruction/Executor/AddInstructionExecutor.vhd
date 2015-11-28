@@ -77,7 +77,8 @@ architecture AddInstructionExecutorImpl of AddInstructionExecutor is
 
 		execute,
 
-		store_result
+		store_result,
+		store_carry
 	);
 	signal state: state_type := fetch_arg0;
 
@@ -86,6 +87,8 @@ architecture AddInstructionExecutorImpl of AddInstructionExecutor is
 	
 	signal carry_bit: std_logic;
 	signal result: RegisterData;
+	
+	signal temp: std_logic_vector(dataWidth downto 0);
 
 begin
 	process (clock) begin
@@ -118,21 +121,27 @@ begin
 						register_enable <= '0';
 
 					when execute =>
-						--	TODO handle the carry bit
+						--temp has size dataWidth the extra bit being the carry out result
+						temp <= arg0(dataWidth) & arg0 + arg1(dataWidth) & arg1;
+						arg0_ext <= 
 						
-						--(carry_bit & result) <= arg0(DataWidth-1)&arg0 + arg1(DataWidth-1)&arg1;
-		
-						--output <= temp(N-1 downto 0);
-						--carry_out <= temp(N);
+						result <= temp(dataWidth-1 downto 0);
+						carry <= temp(dataWidth);
 						
-						--result <= arg0 + arg1;
 						state <= store_result;
-
+						
 					when store_result =>
 						register_address <= AccumulatorRegister;
 						register_operation <= OP_REG_SET;
 						register_enable <= '1';
-
+						register_data <= result;
+						
+					when store_carry	=>
+						register_address <= SpecialReg;
+						register_operation <= OP_REG_SET;
+						register_enable <= '1';
+						register_data(CarryBit) <= carry;
+						
 						instruction_ready <= '1';
 				end case;
 
