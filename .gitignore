@@ -6,3 +6,8 @@ db/
 incremental_db/
 db/
 output_files/
+cycloneii
+
+# Ignore IntelliJ & Eclipse files
+.idea
+.metadata

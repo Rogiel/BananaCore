@@ -17,12 +17,17 @@ use BananaCore.InstructionDecoder;
 use BananaCore.Instruction.all;
 use BananaCore.Core.all;
 use BananaCore.Memory.all;
+use BananaCore.RegisterPackage.all;
 
 -- Decodes a instruction bit stream into a organized and easy to use instruction record
 entity InstructionController is
 	port(
 		-- the processor main clock 
  		clock: in BananaCore.Core.Clock;
+		
+		------------------------------------------
+		-- MEMORY BUS
+		------------------------------------------
 		
 		-- the address to read/write memory from/to 
  		memory_address: out MemoryAddress;
@@ -34,7 +39,23 @@ entity InstructionController is
  		memory_operation: out MemoryOperation;
 		
 		-- a flag indicating if a memory operation has completed
- 		memory_ready: in std_logic
+ 		memory_ready: in std_logic;
+		
+		------------------------------------------
+		-- REGISTER BUS
+		------------------------------------------
+		
+		-- the processor memory address bus
+		register_address: out RegisterAddress;
+		
+		-- the processor memory data bus
+		register_data: inout RegisterData;
+		
+		-- the processor memory operation signal
+		register_operation: out RegisterOperation;
+		
+		-- the processor memory operation signal
+		register_enable: out std_logic
 	);
 	
 end InstructionController;
