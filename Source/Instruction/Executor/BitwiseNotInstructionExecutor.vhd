@@ -116,6 +116,7 @@ begin
 
 					when execute =>
 						-- TODO implement instruction here
+						result <= not arg0;
 						state <= store_result;
 
 					when store_result =>

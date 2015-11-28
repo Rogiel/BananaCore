@@ -116,6 +116,7 @@ begin
 
 					when execute =>
 						-- TODO implement instruction here
+						result <= to_integer (unsigned (arg0)) / to_integer (unsigned (arg1)) ;
 						state <= store_result;
 
 					when store_result =>

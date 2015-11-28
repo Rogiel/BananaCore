@@ -115,7 +115,11 @@ begin
 						register_enable <= '0';
 
 					when execute =>
-						-- TODO implement instruction here
+						-- TODO check instruction here
+						if arg0 > arg1 then
+						result <= '1';
+						else
+						result <= '0';
 						state <= store_result;
 
 					when store_result =>

@@ -116,7 +116,9 @@ begin
 
 					when execute =>
 						-- TODO implement instruction here
+						result <= arg0 and arg1;
 						state <= store_result;
+						
 
 					when store_result =>
 						register_address <= AccumulatorRegister;
