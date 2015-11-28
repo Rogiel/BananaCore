@@ -113,6 +113,18 @@ architecture InstructionControllerImpl of InstructionController is
 	signal instruction_enabler: std_logic_vector(0 to 255);
 	signal instruction_ready: std_logic;
 	
+	signal	memory_address_signal: MemoryAddress;
+ 	signal	memory_data_signal: MemoryData;
+	signal 	memory_operation_signal: MemoryOperation;
+	signal 	memory_ready_signal: std_logic;
+		
+	signal 	register_address_signal: RegisterAddress;
+	signal 	register_data_signal: RegisterData;
+	signal	register_operation_signal: RegisterOperation;
+	signal	register_enable_signal: std_logic;
+	
+	signal memory_enable: std_logic := '0';
+	
 begin
 	-- IMPLEMENTATION NOTE: here, we could very easily (and handly) implement a pipeline.
 	-- While the instruction is being executed we could already start loading the next memory addresses.
@@ -160,21 +172,49 @@ begin
 	add_instruction_executor: AddInstructionExecutor port map(
  		clock => clock,
 		
-		enable => instruction_enabler(2),
-		arg0_address => current_instruction.reg0,
-		arg1_address => current_instruction.reg1,
+		enable 				=> instruction_enabler(2),
+		arg0_address 		=> current_instruction.reg0,
+		arg1_address 		=> current_instruction.reg1,
 		instruction_ready => instruction_ready,
 		
- 		memory_address => memory_address,
-		memory_data => memory_data,
- 		memory_operation => memory_operation,
- 		memory_ready => memory_ready,
+ 		memory_address		 => memory_address_signal,
+		memory_data			 => memory_data_signal,
+ 		memory_operation	 => memory_operation_signal,
+ 		memory_ready		 => memory_ready_signal,
 		
-		register_address => register_address,
-		register_data => register_data,
-		register_operation => register_operation,
-		register_enable => register_enable
+		register_address	 => register_address_signal,
+		register_data		 => register_data_signal,
+		register_operation => register_operation_signal,
+		register_enable	 => register_enable_signal
 	);
+
+	process(clock) begin
+		if clock'event and clock = '1' then
+			if memory_enable = '1' then
+			if memory_operation_signal = MEMORY_OP_WRITE then
+				memory_address <= memory_address_signal;
+				memory_data <= memory_data_signal;
+				memory_ready <= memory_ready_signal;
+				
+				-- the ready signal is received instead of transmitted
+				memory_ready_signal <= memory_ready;
+			
+			elsif memory_operation_signal = MEMORY_OP_READ then
+				memory_address <= memory_address_signal;
+				memory_data_signal <= memory_data;
+				memory_operation <= memory_operation_signal;
+				
+				-- the ready signal is received instead of transmitted
+				memory_ready_signal <= memory_ready;
+				
+			end if;
+			else
+				memory_address <= (others => 'Z');
+			end if;
+		end if;
+			
+	end process;
+	
 	
 	process(clock) begin 
 		if clock'event and clock = '1' then
@@ -354,6 +394,7 @@ begin
 					end case;
 				when execute =>
 					program_counter <= program_counter + current_instruction.size;
+					memory_enable <= '1'; 
 					
 					case current_instruction.opcode is
 						when LOAD => instruction_enabler <= (0 => '1', others => '0');
@@ -375,6 +416,7 @@ begin
 						
 						-- start reading next instruction
 						state <= read_memory0;
+						memory_enable <= '0';
 					else
 						-- keep waiting...
 						state <= wait_execute;
