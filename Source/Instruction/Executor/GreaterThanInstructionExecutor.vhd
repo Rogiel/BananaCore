@@ -122,13 +122,15 @@ begin
 							result <= '0';
 						end if;
 							state <= store_result;
+							
 
 					when store_result =>
-						register_address <= AccumulatorRegister;
+						register_address <= SpecialRegister;
 						register_operation <= OP_REG_SET;
 						register_enable <= '1';
-
+						register_data (CarryBit) <= result;
 						instruction_ready <= '1';
+			
 				end case;
 
 			else
