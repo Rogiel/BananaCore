@@ -127,8 +127,8 @@ begin
 						register_address <= AccumulatorRegister;
 						register_operation <= OP_REG_SET;
 						register_enable <= '1';
-
 						instruction_ready <= '1';
+						register_data <= result;
 				end case;
 
 			else

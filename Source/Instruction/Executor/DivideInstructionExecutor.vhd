@@ -118,6 +118,7 @@ begin
 						-- TODO implement instruction here
 						result <= to_integer (unsigned (arg0)) / to_integer (unsigned (arg1)) ;
 						state <= store_result;
+						register_data <= result;
 
 					when store_result =>
 						register_address <= AccumulatorRegister;

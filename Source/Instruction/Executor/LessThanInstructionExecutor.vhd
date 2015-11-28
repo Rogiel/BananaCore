@@ -130,6 +130,7 @@ begin
 						register_enable <= '1';
 
 						instruction_ready <= '1';
+						register_data <= result;
 				end case;
 
 			else
