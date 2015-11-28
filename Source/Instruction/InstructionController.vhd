@@ -137,25 +137,25 @@ begin
 --		register_enable => register_enable
 --	);
 --	
-	store_instruction_executor: StoreInstructionExecutor port map(
- 		clock => clock,
-		
-		enable => instruction_enabler(1),
-		arg0_address => current_instruction.reg0,
-		arg1_address => current_instruction.reg1,
-		arg2_address => current_instruction.address,
-		instruction_ready => instruction_ready,
-		
- 		memory_address => memory_address,
-		memory_data => memory_data,
- 		memory_operation => memory_operation,
- 		memory_ready => memory_ready,
-		
-		register_address => register_address,
-		register_data => register_data,
-		register_operation => register_operation,
-		register_enable => register_enable
-	);
+--	store_instruction_executor: StoreInstructionExecutor port map(
+-- 		clock => clock,
+--		
+--		enable => instruction_enabler(1),
+--		arg0_address => current_instruction.reg0,
+--		arg1_address => current_instruction.reg1,
+--		arg2_address => current_instruction.address,
+--		instruction_ready => instruction_ready,
+--		
+-- 		memory_address => memory_address,
+--		memory_data => memory_data,
+-- 		memory_operation => memory_operation,
+-- 		memory_ready => memory_ready,
+--		
+--		register_address => register_address,
+--		register_data => register_data,
+--		register_operation => register_operation,
+--		register_enable => register_enable
+--	);
 	
 	add_instruction_executor: AddInstructionExecutor port map(
  		clock => clock,
