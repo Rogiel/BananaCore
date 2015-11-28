@@ -29,7 +29,9 @@ package RegisterPackage is
 	subtype RegisterData is std_logic_vector(DataWidth-1 downto 0);
 	
 	-- Declares the processor native data width
-	constant AccumulatorRegister : RegisterAddress := "1110";
+	constant AccumulatorRegister	: 	RegisterAddress :=	"1110";
+	constant SpecialRegister		:	RegisterAddress :=	"1111";	
+	constant CarryBit					:	integer := 0;	
 	
 	function register_to_integer(address : RegisterData) return integer;
 end package RegisterPackage;
