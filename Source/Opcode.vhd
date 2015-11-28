@@ -8,6 +8,7 @@
 library BananaCore;
 
 use BananaCore.Memory.all;
+use BananaCore.RegisterPackage.all;
 
 package Instruction is
 
@@ -54,10 +55,10 @@ package Instruction is
 		size: integer;
 		
 		-- the first register to operate on
-		reg0: integer;
+		reg0: RegisterAddress;
 		
 		-- the second register to operate on
-		reg1: integer;
+		reg1: RegisterAddress;
 		
 		-- the memory address to operate on
 		address: MemoryAddress;

@@ -15,8 +15,8 @@ use BananaCore.Core.all;
 use BananaCore.Memory.all;
 use BananaCore.RegisterPackage.all;
 
--- The {EntityName} entity
-entity {EntityName} is
+-- The JumpIfCarryInstructionExecutor entity
+entity JumpIfCarryInstructionExecutor is
 	port(
 		-- the processor main clock 
  		clock: in BananaCore.Core.Clock;
@@ -63,9 +63,9 @@ entity {EntityName} is
 		-- the processor register enable signal
 		register_enable: inout std_logic
 	);
-end {EntityName};
+end JumpIfCarryInstructionExecutor;
 
-architecture {EntityName}Impl of {EntityName} is
+architecture JumpIfCarryInstructionExecutorImpl of JumpIfCarryInstructionExecutor is
 
 	type state_type is (
 		fetch_arg0,
@@ -140,4 +140,4 @@ begin
 		end if;
 	end process;
 
-end {EntityName}Impl;
+end JumpIfCarryInstructionExecutorImpl;

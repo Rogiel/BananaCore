@@ -53,6 +53,7 @@ library BananaCore;
 use BananaCore.Memory.all;
 use BananaCore.Core.all;
 use BananaCore.MemoryBank;
+use BananaCore.IOController;
 
 -- A gateway that controls access to the raw processor memory
 entity MemoryController is
@@ -70,17 +71,24 @@ entity MemoryController is
 		operation: in MemoryOperation;
 		
 		-- a flag indicating that a operation has completed
-		ready: out std_logic
+		ready: inout std_logic;
+		
+		-- io port: port0
+		port0: in MemoryData;
+		
+		-- io port: port1
+		port1: out MemoryData
 	);
 	
 end MemoryController;
 
 architecture MemoryControllerImpl of MemoryController is
 	-- a delimiter that sets whenever the memory returned should switch to being IO
-	constant IO_MAPPING_DELIMITER : MemoryAddress := "1111111100000000";
+	constant IO_MAPPING_DELIMITER : MemoryAddress := "1111111111111110";
 	
 	-- the memory bank selector (enables the memory bank)
-	signal memory_bank_selector : bit;
+	signal memory_bank_selector : bit := '0';
+	signal io_selector : bit := '0';
 begin
 	memory_bank: MemoryBank
 	generic map(Size => 256 * 1024)
@@ -92,14 +100,29 @@ begin
 		operation => operation,
 		ready => ready
 	);
+	
+	io_controller: IOController
+	port map(
+		clock => clock,
+		address => address,
+		memory_data => memory_data,
+		selector => io_selector,
+		operation => operation,
+		ready => ready,
+		
+		port0 => port0,
+		port1 => port1
+	);
 
 	process (clock) begin
 		if clock'event and clock = '1' then
 			
-			if address <= IO_MAPPING_DELIMITER then
+			if address < IO_MAPPING_DELIMITER then
 				memory_bank_selector <= '1';
+				io_selector <= '0';
 			else
 				memory_bank_selector <= '0';
+				io_selector <= '1';
 			end if;
 			
 		end if;

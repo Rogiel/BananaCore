@@ -15,8 +15,8 @@ use BananaCore.Core.all;
 use BananaCore.Memory.all;
 use BananaCore.RegisterPackage.all;
 
--- The {EntityName} entity
-entity {EntityName} is
+-- The ResetInstructionExecutor entity
+entity ResetInstructionExecutor is
 	port(
 		-- the processor main clock 
  		clock: in BananaCore.Core.Clock;
@@ -63,9 +63,9 @@ entity {EntityName} is
 		-- the processor register enable signal
 		register_enable: inout std_logic
 	);
-end {EntityName};
+end ResetInstructionExecutor;
 
-architecture {EntityName}Impl of {EntityName} is
+architecture ResetInstructionExecutorImpl of ResetInstructionExecutor is
 
 	type state_type is (
 		fetch_arg0,
@@ -140,4 +140,4 @@ begin
 		end if;
 	end process;
 
-end {EntityName}Impl;
+end ResetInstructionExecutorImpl;

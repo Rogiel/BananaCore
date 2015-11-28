@@ -54,13 +54,10 @@ entity BananaCore is
 		clock: in Clock;
 	
 		-- io port: port0
-		port0: inout bit_vector(DataWidth-1 downto 0);
+		port0: in MemoryData;
 		
 		-- io port: port1
-		port1: inout bit_vector(DataWidth-1 downto 0);
-		
-		-- io port: port2
-		port2: inout bit_vector(DataWidth-1 downto 0)
+		port1: out MemoryData
 	);
 end BananaCore;
 
@@ -105,7 +102,10 @@ begin
 		address => memory_address,
 		memory_data => memory_data,
 		operation => memory_operation,
-		ready => memory_ready
+		ready => memory_ready,
+				
+		port0 => port0,
+		port1 => port1
 	);
 	
 	register_controller: RegisterController

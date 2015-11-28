@@ -26,8 +26,21 @@ package RegisterPackage is
 	subtype RegisterAddress is unsigned(3 downto 0);
 	
 	-- Represents a data
-	subtype RegisterData is std_logic_vector(DataWidth downto 0);
+	subtype RegisterData is std_logic_vector(DataWidth-1 downto 0);
+	
+	-- Declares the processor native data width
+	constant AccumulatorRegister : RegisterAddress := "1110";
+	
+	function register_to_integer(address : RegisterData) return integer;
 end package RegisterPackage;
+
+
+package body RegisterPackage is
+	function register_to_integer(address : RegisterData)
+	return integer is begin
+		return to_integer(unsigned(address));
+	end register_to_integer;
+end RegisterPackage;
 
 library ieee;
 use ieee.numeric_std.all;

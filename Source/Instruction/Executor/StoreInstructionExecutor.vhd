@@ -15,8 +15,8 @@ use BananaCore.Core.all;
 use BananaCore.Memory.all;
 use BananaCore.RegisterPackage.all;
 
--- The {EntityName} entity
-entity {EntityName} is
+-- The StoreInstructionExecutor entity
+entity StoreInstructionExecutor is
 	port(
 		-- the processor main clock 
  		clock: in BananaCore.Core.Clock;
@@ -27,8 +27,11 @@ entity {EntityName} is
 		-- the first register to operate on (argument 0)
 		arg0_address: in RegisterAddress;
 
-		-- the first register to operate on (argument 1)
+		-- the second register to operate on (argument 1)
 		arg1_address: in RegisterAddress;
+		
+		-- the third register to operate on (argument 2)
+		arg2_address: in MemoryAddress;
 
 		-- a bus indicating if the instruction is ready or not
 		instruction_ready: inout std_logic;
@@ -63,26 +66,23 @@ entity {EntityName} is
 		-- the processor register enable signal
 		register_enable: inout std_logic
 	);
-end {EntityName};
+end StoreInstructionExecutor;
 
-architecture {EntityName}Impl of {EntityName} is
+architecture StoreInstructionExecutorImpl of StoreInstructionExecutor is
 
 	type state_type is (
 		fetch_arg0,
 		store_arg0,
 
-		fetch_arg1,
-		store_arg1,
-
-		execute,
-
-		store_result
+		execute_step1,
+		wait_execute_step1,
+		
+		execute_step2,
+		wait_execute_step2
 	);
 	signal state: state_type := fetch_arg0;
 
 	signal arg0: RegisterData;
-	signal arg1: RegisterData;
-	signal result: RegisterData;
 
 begin
 	process (clock) begin
@@ -93,43 +93,49 @@ begin
 					when fetch_arg0 =>
 						instruction_ready <= '0';
 
-						register_address <= arg0_address;
+						register_address <= arg1_address;
 						register_operation <= OP_REG_GET;
 						register_enable <= '1';
 						state <= store_arg0;
 
 					when store_arg0 =>
 						arg0 <= register_data;
-						state <= fetch_arg1;
-
-					when fetch_arg1 =>
-						register_address <= arg1_address;
-						register_operation <= OP_REG_GET;
-						register_enable <= '1';
-						state <= store_arg1;
-
-					when store_arg1 =>
-						arg1 <= register_data;
-						state <= execute;
-
+						state <= execute_step1;
+						
 						register_enable <= '0';
 
-					when execute =>
-						-- TODO implement instruction here
-						state <= store_result;
-
-					when store_result =>
-						register_address <= AccumulatorRegister;
-						register_operation <= OP_REG_SET;
-						register_enable <= '1';
-
-						instruction_ready <= '1';
+					when execute_step1 =>
+						memory_address <= arg2_address;
+						memory_data <= arg0(15 downto 8);
+						memory_operation <= OP_WRITE;
+					
+						state <= wait_execute_step1;
+					when wait_execute_step1 =>
+						if memory_ready = '1' then
+							state <= execute_step2;
+						else 
+							state <= wait_execute_step1;
+						end if;
+						
+					when execute_step2 =>
+						memory_address <= arg2_address;
+						memory_data <= arg0(7 downto 0);
+						memory_operation <= OP_WRITE;
+					
+						state <= wait_execute_step2;
+					when wait_execute_step2 =>
+						if memory_ready = '1' then
+							instruction_ready <= '1';
+						else 
+							state <= wait_execute_step2;
+						end if;
 				end case;
 
 			else
 				memory_address <= (others => 'Z');
 				memory_data <= (others => 'Z');
 				memory_ready <= 'Z';
+				memory_operation <= "Z";
 
 				register_address <= (others => 'Z');
 				register_data <= (others => 'Z');
@@ -140,4 +146,4 @@ begin
 		end if;
 	end process;
 
-end {EntityName}Impl;
+end StoreInstructionExecutorImpl;

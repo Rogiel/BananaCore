@@ -9,14 +9,15 @@ library ieee;
 use ieee.numeric_std.all;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_1164.std_logic;
+use ieee.std_logic_unsigned.ALL;
 
 library BananaCore;
 use BananaCore.Core.all;
 use BananaCore.Memory.all;
 use BananaCore.RegisterPackage.all;
 
--- The {EntityName} entity
-entity {EntityName} is
+-- The AddInstructionExecutor entity
+entity AddInstructionExecutor is
 	port(
 		-- the processor main clock 
  		clock: in BananaCore.Core.Clock;
@@ -63,9 +64,9 @@ entity {EntityName} is
 		-- the processor register enable signal
 		register_enable: inout std_logic
 	);
-end {EntityName};
+end AddInstructionExecutor;
 
-architecture {EntityName}Impl of {EntityName} is
+architecture AddInstructionExecutorImpl of AddInstructionExecutor is
 
 	type state_type is (
 		fetch_arg0,
@@ -82,6 +83,8 @@ architecture {EntityName}Impl of {EntityName} is
 
 	signal arg0: RegisterData;
 	signal arg1: RegisterData;
+	
+	signal carry_bit: std_logic;
 	signal result: RegisterData;
 
 begin
@@ -115,7 +118,14 @@ begin
 						register_enable <= '0';
 
 					when execute =>
-						-- TODO implement instruction here
+						--	TODO handle the carry bit
+						
+						--(carry_bit & result) <= arg0(DataWidth-1)&arg0 + arg1(DataWidth-1)&arg1;
+		
+						--output <= temp(N-1 downto 0);
+						--carry_out <= temp(N);
+						
+						--result <= arg0 + arg1;
 						state <= store_result;
 
 					when store_result =>
@@ -140,4 +150,4 @@ begin
 		end if;
 	end process;
 
-end {EntityName}Impl;
+end AddInstructionExecutorImpl;

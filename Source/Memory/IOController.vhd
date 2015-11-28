@@ -14,11 +14,7 @@ use BananaCore.Memory.all;
 use BananaCore.Core.Clock;
 
 -- Implements a low level memory instance
-entity MemoryBank is
-	generic(
-		-- the number of bits available in the memory
-		Size: integer
-	);
+entity IOController is
 	port(
 		-- the processor main clock
 		clock: in Clock;
@@ -36,28 +32,30 @@ entity MemoryBank is
 		operation: in MemoryOperation;
 		
 		-- a flag indicating that a operation has completed
-		ready: inout std_logic
+		ready: inout std_logic;
+		
+		-- io port: port0
+		port0: in MemoryData;
+		
+		-- io port: port1
+		port1: out MemoryData
 	);
 	
-end MemoryBank;
+end IOController;
 
-architecture MemoryBankImpl of MemoryBank is
-
-	type MemoryBankStorage is array (0 to Size-1) of MemoryData;
-   signal storage : MemoryBankStorage;
-
+architecture IOControllerImpl of IOController is
 begin process (clock) begin
 	if clock'event and clock = '1' then
 		if selector = '1' then
 			case operation is
 				when OP_READ  => 
-					memory_data <= storage(to_integer(address));
+					memory_data <= port0;
 					ready <= '1';
 				when OP_WRITE => 
-					storage(to_integer(address)) <= memory_data;
+					port1 <= memory_data;
 					ready <= '1';
 			end case;
-		else 
+		else
 			memory_data <= (others => 'Z');
 			ready <= 'Z';
 		end if;
@@ -65,4 +63,4 @@ begin process (clock) begin
 end process;
 	
 
-end MemoryBankImpl;
+end IOControllerImpl;
