@@ -13,20 +13,22 @@ use ieee.std_logic_1164.std_logic;
 library BananaCore;
 use BananaCore.Core.all;
 package Memory is
-	-- Represents a memory operation
-	type MemoryOperation is (
-		-- Writes to the memory
-		OP_WRITE,
-		
-		-- Reads the memory
-		OP_READ
-	);
-		
+	subtype MemoryOperation is std_logic;
+
 	-- Represents a memory address
 	subtype MemoryAddress is unsigned(DataWidth-1 downto 0);
 	
 	-- Represents a data
 	subtype MemoryData is std_logic_vector(7 downto 0);
+	
+	-- Declares the write operation constant
+	constant MEMORY_OP_WRITE : MemoryOperation := '1';
+	
+	-- Declares the read operation constant
+	constant MEMORY_OP_READ : MemoryOperation := '0';
+	
+	-- Declares the read operation constant
+	constant MEMORY_OP_DISABLED : MemoryOperation := 'Z';
 	
 	function integer_to_memory_address(address : integer) return MemoryAddress;
 	function bits_to_memory_address(address : std_logic_vector(DataWidth-1 downto 0)) return MemoryAddress;
@@ -62,13 +64,13 @@ entity MemoryController is
 		clock: in BananaCore.Core.Clock;
 	
 		-- the address to read/write memory from/to
-		address: in MemoryAddress;
+		address: inout MemoryAddress;
 		
 		-- the memory being read/written to
 		memory_data: inout MemoryData;
 		
 		-- the operation to perform on the memory
-		operation: in MemoryOperation;
+		operation: inout std_logic;
 		
 		-- a flag indicating that a operation has completed
 		ready: inout std_logic;

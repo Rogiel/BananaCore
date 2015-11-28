@@ -118,6 +118,7 @@ begin
 						arg1 <= register_data;
 						state <= execute;
 
+						register_operation <= OP_REG_DISABLED;
 						register_enable <= '0';
 
 					when execute =>

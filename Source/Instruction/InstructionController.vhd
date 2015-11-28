@@ -181,7 +181,7 @@ begin
 			case state is
 				when read_memory0 =>
 					memory_address <= integer_to_memory_address(program_counter);
-					memory_operation <= OP_READ;
+					memory_operation <= MEMORY_OP_READ;
 					state <= wait_memory0;
 				when wait_memory0 =>
 					if memory_ready = '1' then
@@ -193,7 +193,7 @@ begin
 					
 				when read_memory1 =>
 					memory_address <= integer_to_memory_address(program_counter + 1);
-					memory_operation <= OP_READ;
+					memory_operation <= MEMORY_OP_READ;
 					state <= wait_memory1;
 				when wait_memory1 =>
 					if memory_ready = '1' then
@@ -205,7 +205,7 @@ begin
 					
 				when read_memory2 =>
 					memory_address <= integer_to_memory_address(program_counter + 2);
-					memory_operation <= OP_READ;
+					memory_operation <= MEMORY_OP_READ;
 					state <= wait_memory2;
 				when wait_memory2 =>
 					if memory_ready = '1' then

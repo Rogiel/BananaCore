@@ -67,10 +67,10 @@ architecture BananaCoreImpl of BananaCore is
 	------------------------------------------
 
 	-- the processor memory address bus
-	signal memory_address: MemoryAddress;
+	signal memory_address: MemoryAddress := (others => 'Z');
 	
 	-- the processor memory data bus
- 	signal memory_data: MemoryData;
+ 	signal memory_data: MemoryData := (others => 'Z');
 	
 	-- the processor memory operation signal
  	signal memory_operation: MemoryOperation;
@@ -89,7 +89,7 @@ architecture BananaCoreImpl of BananaCore is
  	signal register_data: RegisterData := (others => 'Z');
 	
 	-- the processor memory operation signal
- 	signal register_operation: RegisterOperation := OP_REG_GET;
+ 	signal register_operation: RegisterOperation;
 	
 	-- the processor memory operation signal
  	signal register_enable: std_logic := '0';

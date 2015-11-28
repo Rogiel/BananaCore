@@ -14,13 +14,16 @@ library BananaCore;
 use BananaCore.Core.all;
 package RegisterPackage is
 	-- Represents a memory operation
-	type RegisterOperation is (
-		-- Reads from a register
-		OP_REG_GET,
-		
-		-- Writes to a register
-		OP_REG_SET
-	);
+	subtype RegisterOperation is std_logic;
+	
+	-- Declares the write operation constant
+	constant OP_REG_SET : RegisterOperation := '1';
+	
+	-- Declares the read operation constant
+	constant OP_REG_GET : RegisterOperation := '0';
+	
+	-- Declares the read operation constant
+	constant OP_REG_DISABLED : RegisterOperation := 'Z';
 	
 	-- Represents a memory address
 	subtype RegisterAddress is unsigned(3 downto 0);
@@ -62,16 +65,16 @@ entity RegisterController is
 		clock: in BananaCore.Core.Clock;
 	
 		-- the address to read/write memory from/to
-		address: in RegisterAddress;
+		address: inout RegisterAddress;
 		
 		-- the memory being read/written to
 		data: inout RegisterData;
 		
 		-- the operation to perform on the memory
-		operation: in RegisterOperation;
+		operation: inout RegisterOperation;
 		
 		-- a flag indicating that the bus has been enabled
-		enable: in std_logic
+		enable: inout std_logic
 	);
 	
 end RegisterController;

@@ -48,10 +48,10 @@ begin process (clock) begin
 	if clock'event and clock = '1' then
 		if selector = '1' then
 			case operation is
-				when OP_READ  => 
+				when MEMORY_OP_READ  => 
 					memory_data <= port0;
 					ready <= '1';
-				when OP_WRITE => 
+				when MEMORY_OP_WRITE => 
 					port1 <= memory_data;
 					ready <= '1';
 			end case;

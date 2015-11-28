@@ -102,12 +102,13 @@ begin
 						arg0 <= register_data;
 						state <= execute_step1;
 						
+						register_operation <= OP_REG_DISABLED;
 						register_enable <= '0';
 
 					when execute_step1 =>
 						memory_address <= arg2_address;
 						memory_data <= arg0(15 downto 8);
-						memory_operation <= OP_WRITE;
+						memory_operation <= MEMORY_OP_WRITE;
 					
 						state <= wait_execute_step1;
 					when wait_execute_step1 =>
@@ -120,12 +121,13 @@ begin
 					when execute_step2 =>
 						memory_address <= arg2_address;
 						memory_data <= arg0(7 downto 0);
-						memory_operation <= OP_WRITE;
+						memory_operation <= MEMORY_OP_WRITE;
 					
 						state <= wait_execute_step2;
 					when wait_execute_step2 =>
 						if memory_ready = '1' then
 							instruction_ready <= '1';
+							memory_operation <= MEMORY_OP_DISABLED;
 						else 
 							state <= wait_execute_step2;
 						end if;
@@ -135,11 +137,12 @@ begin
 				memory_address <= (others => 'Z');
 				memory_data <= (others => 'Z');
 				memory_ready <= 'Z';
-				memory_operation <= "Z";
+				memory_operation <= MEMORY_OP_DISABLED;
 
 				register_address <= (others => 'Z');
 				register_data <= (others => 'Z');
 				register_enable <= 'Z';
+				register_operation <= OP_REG_DISABLED;
 
 				instruction_ready <= 'Z';
 			end if;
