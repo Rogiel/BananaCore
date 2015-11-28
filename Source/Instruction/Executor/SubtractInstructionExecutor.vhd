@@ -114,14 +114,15 @@ begin
 
 						register_enable <= '0';
 
-					when execute =>
-						-- TODO implement instruction here
+					when execute =>						
+						result <= arg0	-	arg1;
+						
 						state <= store_result;
-
 					when store_result =>
 						register_address <= AccumulatorRegister;
 						register_operation <= OP_REG_SET;
 						register_enable <= '1';
+						registerData <= result;
 
 						instruction_ready <= '1';
 				end case;
