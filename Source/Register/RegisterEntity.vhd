@@ -18,7 +18,10 @@ entity RegisterEntity is
 		clock: in BananaCore.Core.Clock;
 		
 		-- data bus
-		data: inout RegisterData;
+		data_read: out RegisterData;
+		
+		-- data bus
+		data_write: in RegisterData;
 		
 		-- register enabler
 		enable: in std_logic;
@@ -35,16 +38,12 @@ signal storage: RegisterData;
 begin  
 	process (clock) begin  
 		if (clock'event and clock='1') then 
-			if enable = '1' then
-				case operation is
-					when OP_REG_GET =>
-						data <= storage;
-					when OP_REG_SET =>
-						storage <= data;
-				end case;
-			else
-				data <= (others => 'Z');
-			end if;
+			case operation is
+				when OP_REG_GET =>
+					data_read <= storage;
+				when OP_REG_SET =>
+					storage <= data_write;
+			end case;
 		end if;	
 	end process;  
 end RegisterImpl; 

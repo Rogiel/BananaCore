@@ -65,29 +65,36 @@ entity RegisterController is
 		clock: in BananaCore.Core.Clock;
 	
 		-- the address to read/write memory from/to
-		address: inout RegisterAddress;
+		address: in RegisterAddress;
 		
 		-- the memory being read/written to
-		data: inout RegisterData;
+		data_read: out RegisterData;
+		
+		-- the memory being read/written to
+		data_write: in RegisterData;
 		
 		-- the operation to perform on the memory
-		operation: inout RegisterOperation;
+		operation: in RegisterOperation;
 		
 		-- a flag indicating that the bus has been enabled
-		enable: inout std_logic
+		enable: in std_logic
 	);
 	
 end RegisterController;
 
 architecture RegisterControllerImpl of RegisterController is
 
-signal register_enable: std_logic_vector(0 to 15);
+	type RegisterReadDataBus is array (0 to 15) of RegisterData;
+   signal read_data_bus : RegisterReadDataBus;
+
+	signal register_enable: std_logic_vector(0 to 15);
 
 begin
 	generated_registers: for I in 0 to 15 generate
       registerx : RegisterEntity port map(
 			clock => clock, 
-			data => data,
+			data_read => read_data_bus(I),
+			data_write => data_write,
 			enable => register_enable(I),
 			operation => operation
 		);
@@ -98,32 +105,79 @@ begin
 			
 			if enable = '1' then
 				case to_integer(address) is
-					when  0 => register_enable <= ( 0 => '1', others => '0');
-					when  1 => register_enable <= ( 1 => '1', others => '0');
-					when  2 => register_enable <= ( 2 => '1', others => '0');
-					when  3 => register_enable <= ( 3 => '1', others => '0');
-					when  4 => register_enable <= ( 4 => '1', others => '0');
-					when  5 => register_enable <= ( 5 => '1', others => '0');
-					when  6 => register_enable <= ( 6 => '1', others => '0');
-					when  7 => register_enable <= ( 7 => '1', others => '0');
-					when  8 => register_enable <= ( 8 => '1', others => '0');
-					when  9 => register_enable <= ( 9 => '1', others => '0');
-					when 10 => register_enable <= (10 => '1', others => '0');
-					when 11 => register_enable <= (11 => '1', others => '0');
-					when 12 => register_enable <= (12 => '1', others => '0');
-					when 13 => register_enable <= (13 => '1', others => '0');
-					when 14 => register_enable <= (14 => '1', others => '0');
-					when 15 => register_enable <= (15 => '1', others => '0');
+					when  0 =>
+						register_enable <= ( 0 => '1', others => '0');
+						data_read <= read_data_bus(to_integer(address));
+						
+					when  1 => 
+						register_enable <= ( 1 => '1', others => '0');
+						data_read <= read_data_bus(to_integer(address));
+						
+					when  2 =>
+						register_enable <= ( 2 => '1', others => '0');
+						data_read <= read_data_bus(to_integer(address));
+						
+					when  3 =>
+						register_enable <= ( 3 => '1', others => '0');
+						data_read <= read_data_bus(to_integer(address));
+						
+					when  4 =>
+						register_enable <= ( 4 => '1', others => '0');
+						data_read <= read_data_bus(to_integer(address));
+						
+					when  5 => 
+						register_enable <= ( 5 => '1', others => '0');
+						data_read <= read_data_bus(to_integer(address));
+						
+					when  6 => 
+						register_enable <= ( 6 => '1', others => '0');
+						data_read <= read_data_bus(to_integer(address));
+						
+					when  7 => 
+						register_enable <= ( 7 => '1', others => '0');
+						data_read <= read_data_bus(to_integer(address));
+						
+					when  8 => 
+						register_enable <= ( 8 => '1', others => '0');
+						data_read <= read_data_bus(to_integer(address));
+						
+					when  9 =>
+						register_enable <= ( 9 => '1', others => '0');
+						data_read <= read_data_bus(to_integer(address));
+						
+					when 10 => 
+						register_enable <= (10 => '1', others => '0');
+						data_read <= read_data_bus(to_integer(address));
+						
+					when 11 => 
+						register_enable <= (11 => '1', others => '0');
+						data_read <= read_data_bus(to_integer(address));
+						
+					when 12 =>
+						register_enable <= (12 => '1', others => '0');
+						data_read <= read_data_bus(to_integer(address));
+						
+					when 13 =>
+						register_enable <= (13 => '1', others => '0');	
+						data_read <= read_data_bus(to_integer(address));	
+	
+					when 14 =>
+						register_enable <= (14 => '1', others => '0');
+						data_read <= read_data_bus(to_integer(address));
+						
+					when 15 =>
+						register_enable <= (15 => '1', others => '0');
+						data_read <= read_data_bus(to_integer(address));
 					
 					-- if the register is not available, the output is put in high impedance
 					-- and all registers are disabled
 					when others => 
 						register_enable <= (others => '0');
-						data <= (others => 'Z');
+						data_read <= (others => 'Z');
 				end case;
 			else
 				register_enable <= (others => '0');
-				data <= (others => 'Z');
+				data_read <= (others => 'Z');
 			end if;
 			
 		end if;

@@ -27,11 +27,8 @@ entity StoreInstructionExecutor is
 		-- the first register to operate on (argument 0)
 		arg0_address: in RegisterAddress;
 
-		-- the second register to operate on (argument 1)
+		-- the first register to operate on (argument 1)
 		arg1_address: in RegisterAddress;
-		
-		-- the third register to operate on (argument 2)
-		arg2_address: in MemoryAddress;
 
 		-- a bus indicating if the instruction is ready or not
 		instruction_ready: inout std_logic;
@@ -40,31 +37,46 @@ entity StoreInstructionExecutor is
 		-- MEMORY BUS
 		------------------------------------------
 		-- the address to read/write memory from/to 
- 		memory_address: inout MemoryAddress;
+ 		memory_address: out MemoryAddress;
  		 
- 		-- the memory being read/written to 
-		memory_data: inout MemoryData;
- 		 
+ 		-- the memory being read to
+		memory_data_read: in MemoryData;
+
+ 		-- the memory being written to
+		memory_data_write: out MemoryData;
+
  		-- the operation to perform on the memory 
- 		memory_operation: inout MemoryOperation;
+ 		memory_operation: out MemoryOperation;
 		
 		-- a flag indicating if a memory operation has completed
- 		memory_ready: inout std_logic;
+ 		memory_ready: in std_logic;
 		
 		------------------------------------------
 		-- REGISTER BUS
 		------------------------------------------
 		-- the processor register address bus
-		register_address: inout RegisterAddress;
+		register_address: out RegisterAddress;
 		
 		-- the processor register data bus
-		register_data: inout RegisterData;
+		register_data_read: in RegisterData;
+
+		-- the processor register data bus
+		register_data_write: out RegisterData;
 		
 		-- the processor register operation signal
-		register_operation: inout RegisterOperation;
+		register_operation: out RegisterOperation;
 		
 		-- the processor register enable signal
-		register_enable: inout std_logic
+		register_enable: out std_logic;
+
+		------------------------------------------
+		-- IO ports
+		------------------------------------------
+		-- io port: port0
+		port0: in MemoryData;
+
+		-- io port: port1
+		port1: out MemoryData
 	);
 end StoreInstructionExecutor;
 
@@ -74,15 +86,18 @@ architecture StoreInstructionExecutorImpl of StoreInstructionExecutor is
 		fetch_arg0,
 		store_arg0,
 
-		execute_step1,
-		wait_execute_step1,
-		
-		execute_step2,
-		wait_execute_step2
+		fetch_arg1,
+		store_arg1,
+
+		execute,
+
+		store_result
 	);
 	signal state: state_type := fetch_arg0;
 
 	signal arg0: RegisterData;
+	signal arg1: RegisterData;
+	signal result: RegisterData;
 
 begin
 	process (clock) begin
@@ -93,58 +108,42 @@ begin
 					when fetch_arg0 =>
 						instruction_ready <= '0';
 
-						register_address <= arg1_address;
+						register_address <= arg0_address;
 						register_operation <= OP_REG_GET;
 						register_enable <= '1';
 						state <= store_arg0;
 
 					when store_arg0 =>
-						arg0 <= register_data;
-						state <= execute_step1;
-						
-						register_operation <= OP_REG_DISABLED;
+						arg0 <= register_data_read;
+						state <= fetch_arg1;
+
+					when fetch_arg1 =>
+						register_address <= arg1_address;
+						register_operation <= OP_REG_GET;
+						register_enable <= '1';
+						state <= store_arg1;
+
+					when store_arg1 =>
+						arg1 <= register_data_read;
+						state <= execute;
+
 						register_enable <= '0';
 
-					when execute_step1 =>
-						memory_address <= arg2_address;
-						memory_data <= arg0(15 downto 8);
-						memory_operation <= MEMORY_OP_WRITE;
-					
-						state <= wait_execute_step1;
-					when wait_execute_step1 =>
-						if memory_ready = '1' then
-							state <= execute_step2;
-						else 
-							state <= wait_execute_step1;
-						end if;
-						
-					when execute_step2 =>
-						memory_address <= arg2_address;
-						memory_data <= arg0(7 downto 0);
-						memory_operation <= MEMORY_OP_WRITE;
-					
-						state <= wait_execute_step2;
-					when wait_execute_step2 =>
-						if memory_ready = '1' then
-							instruction_ready <= '1';
-							memory_operation <= MEMORY_OP_DISABLED;
-						else 
-							state <= wait_execute_step2;
-						end if;
+					when execute =>
+						-- TODO implement instruction here
+						state <= store_result;
+
+					when store_result =>
+						register_address <= AccumulatorRegister;
+						register_operation <= OP_REG_SET;
+						register_data_write <= result;
+						register_enable <= '1';
+
+						instruction_ready <= 'Z';
 				end case;
 
 			else
-				memory_address <= (others => 'Z');
-				memory_data <= (others => 'Z');
-				memory_ready <= 'Z';
-				memory_operation <= MEMORY_OP_DISABLED;
-
-				register_address <= (others => 'Z');
-				register_data <= (others => 'Z');
-				register_enable <= 'Z';
-				register_operation <= OP_REG_DISABLED;
-
-				instruction_ready <= 'Z';
+				instruction_ready <= '0';
 			end if;
 		end if;
 	end process;

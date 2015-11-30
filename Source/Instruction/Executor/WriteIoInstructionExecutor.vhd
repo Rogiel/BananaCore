@@ -15,8 +15,8 @@ use BananaCore.Core.all;
 use BananaCore.Memory.all;
 use BananaCore.RegisterPackage.all;
 
--- The EqualInstructionExecutor entity
-entity EqualInstructionExecutor is
+-- The WriteIoInstructionExecutor entity
+entity WriteIoInstructionExecutor is
 	port(
 		-- the processor main clock 
  		clock: in BananaCore.Core.Clock;
@@ -78,19 +78,15 @@ entity EqualInstructionExecutor is
 		-- io port: port1
 		port1: out MemoryData
 	);
-end EqualInstructionExecutor;
+end WriteIoInstructionExecutor;
 
-architecture EqualInstructionExecutorImpl of EqualInstructionExecutor is
+architecture WriteIoInstructionExecutorImpl of WriteIoInstructionExecutor is
 
 	type state_type is (
 		fetch_arg0,
 		store_arg0,
 
-		fetch_arg1,
-		store_arg1,
-
 		execute,
-
 		store_result
 	);
 	signal state: state_type := fetch_arg0;
@@ -115,30 +111,14 @@ begin
 
 					when store_arg0 =>
 						arg0 <= register_data_read;
-						state <= fetch_arg1;
-
-					when fetch_arg1 =>
-						register_address <= arg1_address;
-						register_operation <= OP_REG_GET;
-						register_enable <= '1';
-						state <= store_arg1;
-
-					when store_arg1 =>
-						arg1 <= register_data_read;
 						state <= execute;
 
-						register_enable <= '0';
-
 					when execute =>
-						-- TODO implement instruction here
+						port1 <= arg1(7 downto 0);
 						state <= store_result;
+						instruction_ready <= '1';
 
 					when store_result =>
-						register_address <= AccumulatorRegister;
-						register_operation <= OP_REG_SET;
-						register_data_write <= result;
-						register_enable <= '1';
-
 						instruction_ready <= 'Z';
 				end case;
 
@@ -148,4 +128,4 @@ begin
 		end if;
 	end process;
 
-end EqualInstructionExecutorImpl;
+end WriteIoInstructionExecutorImpl;

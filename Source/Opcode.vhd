@@ -16,8 +16,10 @@ package Instruction is
 	type InstructionCode is (
 		-- Memory Control instructions
 		LOAD,			      
-		STORE, 			 	
-		NOT_CARRY_BIT, 			
+		STORE, 	
+		
+		WRITE_IO,			      
+		READ_IO, 		
 		-- Arithmetic Instructions 
 		ADD, 				
 		SUBTRACT, 			

@@ -1,6 +1,9 @@
 ./generator.py Load
 ./generator.py Store
 
+./generator.py WriteIo
+./generator.py ReadIo
+
 ./generator.py Add
 ./generator.py Subtract
 ./generator.py Multiply

@@ -27,10 +27,10 @@ entity MemoryBank is
 		address: in MemoryAddress;
 		
 		-- the memory being read/written to
-		memory_data: inout MemoryData;
-		
-		-- enables the memory
-		selector: in bit;
+		memory_data_read: out MemoryData;
+				
+		-- the memory being read/written to
+		memory_data_write: in MemoryData;
 				
 		-- the operation to perform on the memory
 		operation: in std_logic;
@@ -48,19 +48,14 @@ architecture MemoryBankImpl of MemoryBank is
 
 begin process (clock) begin
 	if clock'event and clock = '1' then
-		if selector = '1' then
-			case operation is
-				when MEMORY_OP_READ  => 
-					memory_data <= storage(to_integer(address));
-					ready <= '1';
-				when MEMORY_OP_WRITE => 
-					storage(to_integer(address)) <= memory_data;
-					ready <= '1';
-			end case;
-		else 
-			memory_data <= (others => 'Z');
-			ready <= 'Z';
-		end if;
+		case operation is
+			when MEMORY_OP_READ  => 
+				memory_data_read <= storage(to_integer(address));
+				ready <= '1';
+			when MEMORY_OP_WRITE => 
+				storage(to_integer(address)) <= memory_data_write;
+				ready <= '1';
+		end case;
 	end if;
 end process;
 	

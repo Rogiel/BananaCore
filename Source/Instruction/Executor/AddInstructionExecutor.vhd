@@ -9,7 +9,6 @@ library ieee;
 use ieee.numeric_std.all;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_1164.std_logic;
-use ieee.std_logic_unsigned.ALL;
 
 library BananaCore;
 use BananaCore.Core.all;
@@ -38,31 +37,46 @@ entity AddInstructionExecutor is
 		-- MEMORY BUS
 		------------------------------------------
 		-- the address to read/write memory from/to 
- 		memory_address: inout MemoryAddress;
+ 		memory_address: out MemoryAddress;
  		 
- 		-- the memory being read/written to 
-		memory_data: inout MemoryData;
- 		 
+ 		-- the memory being read to
+		memory_data_read: in MemoryData;
+
+ 		-- the memory being written to
+		memory_data_write: out MemoryData;
+
  		-- the operation to perform on the memory 
- 		memory_operation: inout MemoryOperation;
+ 		memory_operation: out MemoryOperation;
 		
 		-- a flag indicating if a memory operation has completed
- 		memory_ready: inout std_logic;
+ 		memory_ready: in std_logic;
 		
 		------------------------------------------
 		-- REGISTER BUS
 		------------------------------------------
 		-- the processor register address bus
-		register_address: inout RegisterAddress;
+		register_address: out RegisterAddress;
 		
 		-- the processor register data bus
-		register_data: inout RegisterData;
+		register_data_read: in RegisterData;
+
+		-- the processor register data bus
+		register_data_write: out RegisterData;
 		
 		-- the processor register operation signal
-		register_operation: inout RegisterOperation;
+		register_operation: out RegisterOperation;
 		
 		-- the processor register enable signal
-		register_enable: inout std_logic
+		register_enable: out std_logic;
+
+		------------------------------------------
+		-- IO ports
+		------------------------------------------
+		-- io port: port0
+		port0: in MemoryData;
+
+		-- io port: port1
+		port1: out MemoryData
 	);
 end AddInstructionExecutor;
 
@@ -77,18 +91,13 @@ architecture AddInstructionExecutorImpl of AddInstructionExecutor is
 
 		execute,
 
-		store_result,
-		store_carry
+		store_result
 	);
 	signal state: state_type := fetch_arg0;
 
 	signal arg0: RegisterData;
 	signal arg1: RegisterData;
-	
-	signal carry_bit: std_logic;
 	signal result: RegisterData;
-	
-	signal temp: std_logic_vector(dataWidth downto 0);
 
 begin
 	process (clock) begin
@@ -105,7 +114,7 @@ begin
 						state <= store_arg0;
 
 					when store_arg0 =>
-						arg0 <= register_data;
+						arg0 <= register_data_read;
 						state <= fetch_arg1;
 
 					when fetch_arg1 =>
@@ -115,47 +124,26 @@ begin
 						state <= store_arg1;
 
 					when store_arg1 =>
-						arg1 <= register_data;
+						arg1 <= register_data_read;
 						state <= execute;
 
-						register_operation <= OP_REG_DISABLED;
 						register_enable <= '0';
 
 					when execute =>
-						--temp has size dataWidth the extra bit being the carry out result
-						temp <= arg0(dataWidth) & arg0 + arg1(dataWidth) & arg1;
-						arg0_ext <= 
-						
-						result <= temp(dataWidth-1 downto 0);
-						carry <= temp(dataWidth);
-						
+						-- TODO implement instruction here
 						state <= store_result;
-						
+
 					when store_result =>
 						register_address <= AccumulatorRegister;
 						register_operation <= OP_REG_SET;
+						register_data_write <= result;
 						register_enable <= '1';
-						register_data <= result;
-						
-					when store_carry	=>
-						register_address <= SpecialReg;
-						register_operation <= OP_REG_SET;
-						register_enable <= '1';
-						register_data(CarryBit) <= carry;
-						
-						instruction_ready <= '1';
+
+						instruction_ready <= 'Z';
 				end case;
 
 			else
-				memory_address <= (others => 'Z');
-				memory_data <= (others => 'Z');
-				memory_ready <= 'Z';
-
-				register_address <= (others => 'Z');
-				register_data <= (others => 'Z');
-				register_enable <= 'Z';
-
-				instruction_ready <= 'Z';
+				instruction_ready <= '0';
 			end if;
 		end if;
 	end process;

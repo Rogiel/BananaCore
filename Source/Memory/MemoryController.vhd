@@ -67,67 +67,51 @@ entity MemoryController is
 		address: inout MemoryAddress;
 		
 		-- the memory being read/written to
-		memory_data: inout MemoryData;
+		memory_data_write: in MemoryData;
+		
+		-- the memory being read/written to
+		memory_data_read: out MemoryData;
 		
 		-- the operation to perform on the memory
 		operation: inout std_logic;
 		
 		-- a flag indicating that a operation has completed
-		ready: inout std_logic;
-		
-		-- io port: port0
-		port0: in MemoryData;
-		
-		-- io port: port1
-		port1: out MemoryData
+		ready: inout std_logic
 	);
 	
 end MemoryController;
 
 architecture MemoryControllerImpl of MemoryController is
-	-- a delimiter that sets whenever the memory returned should switch to being IO
-	constant IO_MAPPING_DELIMITER : MemoryAddress := "1111111111111110";
-	
-	-- the memory bank selector (enables the memory bank)
-	signal memory_bank_selector : bit := '0';
-	signal io_selector : bit := '0';
+--	-- a delimiter that sets whenever the memory returned should switch to being IO
+--	constant IO_MAPPING_DELIMITER : MemoryAddress := "1111111111111110";
+--	
+--	-- the memory bank selector (enables the memory bank)
+--	signal memory_bank_selector : bit := '0';
+--	signal io_selector : bit := '0';
+
 begin
 	memory_bank: MemoryBank
 	generic map(Size => 256 * 1024)
 	port map(
 		clock => clock,
 		address => address,
-		memory_data => memory_data,
-		selector => memory_bank_selector,
+		memory_data_read => memory_data_read,
+		memory_data_write => memory_data_write,
 		operation => operation,
 		ready => ready
 	);
-	
-	io_controller: IOController
-	port map(
-		clock => clock,
-		address => address,
-		memory_data => memory_data,
-		selector => io_selector,
-		operation => operation,
-		ready => ready,
-		
-		port0 => port0,
-		port1 => port1
-	);
-
-	process (clock) begin
-		if clock'event and clock = '1' then
-			
-			if address < IO_MAPPING_DELIMITER then
-				memory_bank_selector <= '1';
-				io_selector <= '0';
-			else
-				memory_bank_selector <= '0';
-				io_selector <= '1';
-			end if;
-			
-		end if;
-	end process;
+--	
+--	io_controller: IOController
+--	port map(
+--		clock => clock,
+--		address => address,
+--		memory_data => memory_data,
+--		selector => io_selector,
+--		operation => operation,
+--		ready => ready,
+--		
+--		port0 => port0,
+--		port1 => port1
+--	);
 
 end MemoryControllerImpl;

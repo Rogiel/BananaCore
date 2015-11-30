@@ -67,10 +67,13 @@ architecture BananaCoreImpl of BananaCore is
 	------------------------------------------
 
 	-- the processor memory address bus
-	signal memory_address: MemoryAddress := (others => 'Z');
+	signal memory_address: MemoryAddress;
 	
 	-- the processor memory data bus
- 	signal memory_data: MemoryData := (others => 'Z');
+ 	signal memory_data_read: MemoryData;
+	
+	-- the processor memory data bus
+ 	signal memory_data_write: MemoryData;
 	
 	-- the processor memory operation signal
  	signal memory_operation: MemoryOperation;
@@ -82,17 +85,20 @@ architecture BananaCoreImpl of BananaCore is
 	-- REGISTER BUS
 	------------------------------------------
 	
-	-- the processor memory address bus
-	signal register_address: RegisterAddress := (others => '0');
+	-- the processor register address bus
+	signal register_address: RegisterAddress;
 	
-	-- the processor memory data bus
- 	signal register_data: RegisterData := (others => 'Z');
+	-- the processor register data bus
+ 	signal register_data_read: RegisterData;
 	
-	-- the processor memory operation signal
+	-- the processor register data bus
+ 	signal register_data_write: RegisterData;
+	
+	-- the processor register operation signal
  	signal register_operation: RegisterOperation;
 	
-	-- the processor memory operation signal
- 	signal register_enable: std_logic := '0';
+	-- the processor register operation signal
+ 	signal register_enable: std_logic;
 	
 begin
 	
@@ -100,19 +106,18 @@ begin
 	port map(
 		clock => clock,
 		address => memory_address,
-		memory_data => memory_data,
+		memory_data_read => memory_data_read,
+		memory_data_write => memory_data_write,
 		operation => memory_operation,
-		ready => memory_ready,
-				
-		port0 => port0,
-		port1 => port1
+		ready => memory_ready
 	);
 	
 	register_controller: RegisterController
 	port map(
 		clock => clock,
 		address => register_address,
-		data => register_data,
+		data_read => register_data_read,
+		data_write => register_data_write,
 		operation => register_operation,
 		enable => register_enable
 	);
@@ -121,14 +126,19 @@ begin
 	port map(
 		clock => clock,
 		memory_address => memory_address,
-		memory_data => memory_data,
+		memory_data_read => memory_data_read,
+		memory_data_write => memory_data_write,
 		memory_operation => memory_operation,
 		memory_ready => memory_ready,
 		
 		register_address => register_address,
-		register_data => register_data,
+		register_data_read => register_data_read,
+		register_data_write => register_data_write,
 		register_operation => register_operation,
-		register_enable => register_enable
+		register_enable => register_enable,
+		
+		port0 => port0,
+		port1 => port1
 	);
 
 end BananaCoreImpl;
