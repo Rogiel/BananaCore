@@ -46,10 +46,6 @@ use BananaCore.RegisterEntity;
 
 -- Implements the processor entry point
 entity BananaCore is
-	generic(
-		-- the data width to be used within the processor
-		DataWidth: integer := 32
-	);
 	port(
 		clock: in Clock;
 	

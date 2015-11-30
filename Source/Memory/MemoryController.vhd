@@ -64,7 +64,7 @@ entity MemoryController is
 		clock: in BananaCore.Core.Clock;
 	
 		-- the address to read/write memory from/to
-		address: inout MemoryAddress;
+		address: in MemoryAddress;
 		
 		-- the memory being read/written to
 		memory_data_write: in MemoryData;
@@ -73,10 +73,10 @@ entity MemoryController is
 		memory_data_read: out MemoryData;
 		
 		-- the operation to perform on the memory
-		operation: inout std_logic;
+		operation: in std_logic;
 		
 		-- a flag indicating that a operation has completed
-		ready: inout std_logic
+		ready: out std_logic
 	);
 	
 end MemoryController;

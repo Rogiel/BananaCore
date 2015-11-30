@@ -31,7 +31,7 @@ entity WriteIoInstructionExecutor is
 		arg1_address: in RegisterAddress;
 
 		-- a bus indicating if the instruction is ready or not
-		instruction_ready: inout std_logic;
+		instruction_ready: out std_logic;
 
 		------------------------------------------
 		-- MEMORY BUS
@@ -114,16 +114,17 @@ begin
 						state <= execute;
 
 					when execute =>
-						port1 <= arg1(7 downto 0);
+						port1 <= arg0(7 downto 0);
 						state <= store_result;
-						instruction_ready <= '1';
 
 					when store_result =>
-						instruction_ready <= 'Z';
+						instruction_ready <= '1';
+						state <= store_result;
 				end case;
 
 			else
 				instruction_ready <= '0';
+				state <= fetch_arg0;
 			end if;
 		end if;
 	end process;

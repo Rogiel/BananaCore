@@ -36,7 +36,7 @@ entity MemoryBank is
 		operation: in std_logic;
 		
 		-- a flag indicating that a operation has completed
-		ready: inout std_logic
+		ready: out std_logic
 	);
 	
 end MemoryBank;
@@ -56,6 +56,7 @@ begin process (clock) begin
 				storage(to_integer(address)) <= memory_data_write;
 				ready <= '1';
 		end case;
+		ready <= '0';
 	end if;
 end process;
 	

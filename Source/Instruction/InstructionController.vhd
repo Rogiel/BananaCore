@@ -83,10 +83,10 @@ entity InstructionController is
 		register_address: out RegisterAddress;
 
 		-- the processor memory data bus
-		register_data_read: inout RegisterData;
+		register_data_read: in RegisterData;
 		
 		-- the processor memory data bus
-		register_data_write: inout RegisterData;
+		register_data_write: out RegisterData;
 
 		-- the processor memory operation signal
 		register_operation: out RegisterOperation;
@@ -129,7 +129,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal state: state_type := read_memory0;
 
 	signal instruction_enabler: std_logic_vector(0 to 255);
-	signal instruction_ready: std_logic;
+	signal instruction_ready: std_logic_vector(0 to 255);
 
 	signal memory_address_local: MemoryAddress;
 	signal memory_data_write_local: MemoryData;
@@ -140,257 +140,237 @@ architecture InstructionControllerImpl of InstructionController is
 	signal register_operation_local: RegisterOperation;
 	signal register_enable_local: std_logic;
 	
+	attribute keep: boolean;
+	attribute keep of instruction_ready: signal is true;
+	attribute keep of instruction_data: signal is true;
+	attribute keep of current_instruction: signal is true;
+	
 	-- [[[cog
 	--content = [line.rstrip('\n') for line in open('instructions.txt')]
 	--for line in content:
 	--	cog.outl("signal memory_address_{0}: MemoryAddress;".format(line.lower()))
-	--	cog.outl("signal memory_data_{0}: MemoryData;".format(line.lower()))
 	--	cog.outl("signal memory_data_write_{0}: MemoryData;".format(line.lower()))
 	--	cog.outl("signal memory_operation_{0}: MemoryOperation;".format(line.lower()))
 	--	cog.outl("signal register_address_{0}: RegisterAddress;".format(line.lower()))
 	--	cog.outl("signal register_data_write_{0}: RegisterData;".format(line.lower()))
-	--	cog.outl("signal register_operation_{0}: RegisterOperation;".format(line.lower()))
+	--	cog.outl("signal register_operation_{0}: RegisterOperation := OP_REG_DISABLED;".format(line.lower()))
 	--	cog.outl("signal register_enable_{0}: std_logic;".format(line.lower()))
 	--	cog.outl("signal port1_{0}: MemoryData;".format(line.lower()))
 	-- 	cog.outl();
 	--]]]
 	signal memory_address_load: MemoryAddress;
-	signal memory_data_load: MemoryData;
 	signal memory_data_write_load: MemoryData;
 	signal memory_operation_load: MemoryOperation;
 	signal register_address_load: RegisterAddress;
 	signal register_data_write_load: RegisterData;
-	signal register_operation_load: RegisterOperation;
+	signal register_operation_load: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_load: std_logic;
 	signal port1_load: MemoryData;
 
 	signal memory_address_store: MemoryAddress;
-	signal memory_data_store: MemoryData;
 	signal memory_data_write_store: MemoryData;
 	signal memory_operation_store: MemoryOperation;
 	signal register_address_store: RegisterAddress;
 	signal register_data_write_store: RegisterData;
-	signal register_operation_store: RegisterOperation;
+	signal register_operation_store: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_store: std_logic;
 	signal port1_store: MemoryData;
 
 	signal memory_address_writeio: MemoryAddress;
-	signal memory_data_writeio: MemoryData;
 	signal memory_data_write_writeio: MemoryData;
 	signal memory_operation_writeio: MemoryOperation;
 	signal register_address_writeio: RegisterAddress;
 	signal register_data_write_writeio: RegisterData;
-	signal register_operation_writeio: RegisterOperation;
+	signal register_operation_writeio: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_writeio: std_logic;
 	signal port1_writeio: MemoryData;
 
 	signal memory_address_readio: MemoryAddress;
-	signal memory_data_readio: MemoryData;
 	signal memory_data_write_readio: MemoryData;
 	signal memory_operation_readio: MemoryOperation;
 	signal register_address_readio: RegisterAddress;
 	signal register_data_write_readio: RegisterData;
-	signal register_operation_readio: RegisterOperation;
+	signal register_operation_readio: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_readio: std_logic;
 	signal port1_readio: MemoryData;
 
 	signal memory_address_add: MemoryAddress;
-	signal memory_data_add: MemoryData;
 	signal memory_data_write_add: MemoryData;
 	signal memory_operation_add: MemoryOperation;
 	signal register_address_add: RegisterAddress;
 	signal register_data_write_add: RegisterData;
-	signal register_operation_add: RegisterOperation;
+	signal register_operation_add: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_add: std_logic;
 	signal port1_add: MemoryData;
 
 	signal memory_address_subtract: MemoryAddress;
-	signal memory_data_subtract: MemoryData;
 	signal memory_data_write_subtract: MemoryData;
 	signal memory_operation_subtract: MemoryOperation;
 	signal register_address_subtract: RegisterAddress;
 	signal register_data_write_subtract: RegisterData;
-	signal register_operation_subtract: RegisterOperation;
+	signal register_operation_subtract: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_subtract: std_logic;
 	signal port1_subtract: MemoryData;
 
 	signal memory_address_multiply: MemoryAddress;
-	signal memory_data_multiply: MemoryData;
 	signal memory_data_write_multiply: MemoryData;
 	signal memory_operation_multiply: MemoryOperation;
 	signal register_address_multiply: RegisterAddress;
 	signal register_data_write_multiply: RegisterData;
-	signal register_operation_multiply: RegisterOperation;
+	signal register_operation_multiply: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_multiply: std_logic;
 	signal port1_multiply: MemoryData;
 
 	signal memory_address_divide: MemoryAddress;
-	signal memory_data_divide: MemoryData;
 	signal memory_data_write_divide: MemoryData;
 	signal memory_operation_divide: MemoryOperation;
 	signal register_address_divide: RegisterAddress;
 	signal register_data_write_divide: RegisterData;
-	signal register_operation_divide: RegisterOperation;
+	signal register_operation_divide: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_divide: std_logic;
 	signal port1_divide: MemoryData;
 
 	signal memory_address_bitwiseand: MemoryAddress;
-	signal memory_data_bitwiseand: MemoryData;
 	signal memory_data_write_bitwiseand: MemoryData;
 	signal memory_operation_bitwiseand: MemoryOperation;
 	signal register_address_bitwiseand: RegisterAddress;
 	signal register_data_write_bitwiseand: RegisterData;
-	signal register_operation_bitwiseand: RegisterOperation;
+	signal register_operation_bitwiseand: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_bitwiseand: std_logic;
 	signal port1_bitwiseand: MemoryData;
 
 	signal memory_address_bitwiseor: MemoryAddress;
-	signal memory_data_bitwiseor: MemoryData;
 	signal memory_data_write_bitwiseor: MemoryData;
 	signal memory_operation_bitwiseor: MemoryOperation;
 	signal register_address_bitwiseor: RegisterAddress;
 	signal register_data_write_bitwiseor: RegisterData;
-	signal register_operation_bitwiseor: RegisterOperation;
+	signal register_operation_bitwiseor: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_bitwiseor: std_logic;
 	signal port1_bitwiseor: MemoryData;
 
 	signal memory_address_bitwisenand: MemoryAddress;
-	signal memory_data_bitwisenand: MemoryData;
 	signal memory_data_write_bitwisenand: MemoryData;
 	signal memory_operation_bitwisenand: MemoryOperation;
 	signal register_address_bitwisenand: RegisterAddress;
 	signal register_data_write_bitwisenand: RegisterData;
-	signal register_operation_bitwisenand: RegisterOperation;
+	signal register_operation_bitwisenand: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_bitwisenand: std_logic;
 	signal port1_bitwisenand: MemoryData;
 
 	signal memory_address_bitwisenor: MemoryAddress;
-	signal memory_data_bitwisenor: MemoryData;
 	signal memory_data_write_bitwisenor: MemoryData;
 	signal memory_operation_bitwisenor: MemoryOperation;
 	signal register_address_bitwisenor: RegisterAddress;
 	signal register_data_write_bitwisenor: RegisterData;
-	signal register_operation_bitwisenor: RegisterOperation;
+	signal register_operation_bitwisenor: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_bitwisenor: std_logic;
 	signal port1_bitwisenor: MemoryData;
 
 	signal memory_address_bitwisexor: MemoryAddress;
-	signal memory_data_bitwisexor: MemoryData;
 	signal memory_data_write_bitwisexor: MemoryData;
 	signal memory_operation_bitwisexor: MemoryOperation;
 	signal register_address_bitwisexor: RegisterAddress;
 	signal register_data_write_bitwisexor: RegisterData;
-	signal register_operation_bitwisexor: RegisterOperation;
+	signal register_operation_bitwisexor: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_bitwisexor: std_logic;
 	signal port1_bitwisexor: MemoryData;
 
 	signal memory_address_bitwisenot: MemoryAddress;
-	signal memory_data_bitwisenot: MemoryData;
 	signal memory_data_write_bitwisenot: MemoryData;
 	signal memory_operation_bitwisenot: MemoryOperation;
 	signal register_address_bitwisenot: RegisterAddress;
 	signal register_data_write_bitwisenot: RegisterData;
-	signal register_operation_bitwisenot: RegisterOperation;
+	signal register_operation_bitwisenot: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_bitwisenot: std_logic;
 	signal port1_bitwisenot: MemoryData;
 
 	signal memory_address_greaterthan: MemoryAddress;
-	signal memory_data_greaterthan: MemoryData;
 	signal memory_data_write_greaterthan: MemoryData;
 	signal memory_operation_greaterthan: MemoryOperation;
 	signal register_address_greaterthan: RegisterAddress;
 	signal register_data_write_greaterthan: RegisterData;
-	signal register_operation_greaterthan: RegisterOperation;
+	signal register_operation_greaterthan: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_greaterthan: std_logic;
 	signal port1_greaterthan: MemoryData;
 
 	signal memory_address_greaterorequalthan: MemoryAddress;
-	signal memory_data_greaterorequalthan: MemoryData;
 	signal memory_data_write_greaterorequalthan: MemoryData;
 	signal memory_operation_greaterorequalthan: MemoryOperation;
 	signal register_address_greaterorequalthan: RegisterAddress;
 	signal register_data_write_greaterorequalthan: RegisterData;
-	signal register_operation_greaterorequalthan: RegisterOperation;
+	signal register_operation_greaterorequalthan: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_greaterorequalthan: std_logic;
 	signal port1_greaterorequalthan: MemoryData;
 
 	signal memory_address_lessthan: MemoryAddress;
-	signal memory_data_lessthan: MemoryData;
 	signal memory_data_write_lessthan: MemoryData;
 	signal memory_operation_lessthan: MemoryOperation;
 	signal register_address_lessthan: RegisterAddress;
 	signal register_data_write_lessthan: RegisterData;
-	signal register_operation_lessthan: RegisterOperation;
+	signal register_operation_lessthan: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_lessthan: std_logic;
 	signal port1_lessthan: MemoryData;
 
 	signal memory_address_lessorequalthan: MemoryAddress;
-	signal memory_data_lessorequalthan: MemoryData;
 	signal memory_data_write_lessorequalthan: MemoryData;
 	signal memory_operation_lessorequalthan: MemoryOperation;
 	signal register_address_lessorequalthan: RegisterAddress;
 	signal register_data_write_lessorequalthan: RegisterData;
-	signal register_operation_lessorequalthan: RegisterOperation;
+	signal register_operation_lessorequalthan: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_lessorequalthan: std_logic;
 	signal port1_lessorequalthan: MemoryData;
 
 	signal memory_address_equal: MemoryAddress;
-	signal memory_data_equal: MemoryData;
 	signal memory_data_write_equal: MemoryData;
 	signal memory_operation_equal: MemoryOperation;
 	signal register_address_equal: RegisterAddress;
 	signal register_data_write_equal: RegisterData;
-	signal register_operation_equal: RegisterOperation;
+	signal register_operation_equal: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_equal: std_logic;
 	signal port1_equal: MemoryData;
 
 	signal memory_address_notequal: MemoryAddress;
-	signal memory_data_notequal: MemoryData;
 	signal memory_data_write_notequal: MemoryData;
 	signal memory_operation_notequal: MemoryOperation;
 	signal register_address_notequal: RegisterAddress;
 	signal register_data_write_notequal: RegisterData;
-	signal register_operation_notequal: RegisterOperation;
+	signal register_operation_notequal: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_notequal: std_logic;
 	signal port1_notequal: MemoryData;
 
 	signal memory_address_jump: MemoryAddress;
-	signal memory_data_jump: MemoryData;
 	signal memory_data_write_jump: MemoryData;
 	signal memory_operation_jump: MemoryOperation;
 	signal register_address_jump: RegisterAddress;
 	signal register_data_write_jump: RegisterData;
-	signal register_operation_jump: RegisterOperation;
+	signal register_operation_jump: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_jump: std_logic;
 	signal port1_jump: MemoryData;
 
 	signal memory_address_jumpifcarry: MemoryAddress;
-	signal memory_data_jumpifcarry: MemoryData;
 	signal memory_data_write_jumpifcarry: MemoryData;
 	signal memory_operation_jumpifcarry: MemoryOperation;
 	signal register_address_jumpifcarry: RegisterAddress;
 	signal register_data_write_jumpifcarry: RegisterData;
-	signal register_operation_jumpifcarry: RegisterOperation;
+	signal register_operation_jumpifcarry: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_jumpifcarry: std_logic;
 	signal port1_jumpifcarry: MemoryData;
 
 	signal memory_address_halt: MemoryAddress;
-	signal memory_data_halt: MemoryData;
 	signal memory_data_write_halt: MemoryData;
 	signal memory_operation_halt: MemoryOperation;
 	signal register_address_halt: RegisterAddress;
 	signal register_data_write_halt: RegisterData;
-	signal register_operation_halt: RegisterOperation;
+	signal register_operation_halt: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_halt: std_logic;
 	signal port1_halt: MemoryData;
 
 	signal memory_address_reset: MemoryAddress;
-	signal memory_data_reset: MemoryData;
 	signal memory_data_write_reset: MemoryData;
 	signal memory_operation_reset: MemoryOperation;
 	signal register_address_reset: RegisterAddress;
 	signal register_data_write_reset: RegisterData;
-	signal register_operation_reset: RegisterOperation;
+	signal register_operation_reset: RegisterOperation := OP_REG_DISABLED;
 	signal register_enable_reset: std_logic;
 	signal port1_reset: MemoryData;
 
@@ -706,13 +686,14 @@ begin
 	-- 	cog.outl("\tenable => instruction_enabler({Index}),".format(**template_vars))
 	-- 	cog.outl("\targ0_address => current_instruction.reg0,".format(**template_vars))
 	-- 	cog.outl("\targ1_address => current_instruction.reg1,".format(**template_vars))
-	-- 	cog.outl("\tinstruction_ready => instruction_ready,".format(**template_vars))
+	-- 	cog.outl("\tinstruction_ready => instruction_ready({Index}),".format(**template_vars))
 	-- 	cog.outl("\tmemory_address => memory_address_{LowerName},".format(**template_vars))
 	-- 	cog.outl("\tmemory_data_read => memory_data_read,".format(**template_vars))
 	-- 	cog.outl("\tmemory_data_write => memory_data_write_{LowerName},".format(**template_vars))
 	-- 	cog.outl("\tmemory_operation => memory_operation_{LowerName},".format(**template_vars))
 	-- 	cog.outl("\tmemory_ready => memory_ready,".format(**template_vars))
 	-- 	cog.outl("\tregister_address => register_address_{LowerName},".format(**template_vars))
+	-- 	cog.outl("\tregister_operation => register_operation_{LowerName},".format(**template_vars))
 	-- 	cog.outl("\tregister_data_read => register_data_read,".format(**template_vars))
 	-- 	cog.outl("\tregister_data_write => register_data_write_{LowerName},".format(**template_vars))
 	-- 	cog.outl("\tregister_enable => register_enable_{LowerName},".format(**template_vars))
@@ -727,13 +708,14 @@ begin
 		enable => instruction_enabler(0),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(0),
 		memory_address => memory_address_load,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_load,
 		memory_operation => memory_operation_load,
 		memory_ready => memory_ready,
 		register_address => register_address_load,
+		register_operation => register_operation_load,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_load,
 		register_enable => register_enable_load,
@@ -746,13 +728,14 @@ begin
 		enable => instruction_enabler(1),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(1),
 		memory_address => memory_address_store,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_store,
 		memory_operation => memory_operation_store,
 		memory_ready => memory_ready,
 		register_address => register_address_store,
+		register_operation => register_operation_store,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_store,
 		register_enable => register_enable_store,
@@ -765,13 +748,14 @@ begin
 		enable => instruction_enabler(2),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(2),
 		memory_address => memory_address_writeio,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_writeio,
 		memory_operation => memory_operation_writeio,
 		memory_ready => memory_ready,
 		register_address => register_address_writeio,
+		register_operation => register_operation_writeio,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_writeio,
 		register_enable => register_enable_writeio,
@@ -784,13 +768,14 @@ begin
 		enable => instruction_enabler(3),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(3),
 		memory_address => memory_address_readio,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_readio,
 		memory_operation => memory_operation_readio,
 		memory_ready => memory_ready,
 		register_address => register_address_readio,
+		register_operation => register_operation_readio,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_readio,
 		register_enable => register_enable_readio,
@@ -803,13 +788,14 @@ begin
 		enable => instruction_enabler(4),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(4),
 		memory_address => memory_address_add,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_add,
 		memory_operation => memory_operation_add,
 		memory_ready => memory_ready,
 		register_address => register_address_add,
+		register_operation => register_operation_add,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_add,
 		register_enable => register_enable_add,
@@ -822,13 +808,14 @@ begin
 		enable => instruction_enabler(5),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(5),
 		memory_address => memory_address_subtract,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_subtract,
 		memory_operation => memory_operation_subtract,
 		memory_ready => memory_ready,
 		register_address => register_address_subtract,
+		register_operation => register_operation_subtract,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_subtract,
 		register_enable => register_enable_subtract,
@@ -841,13 +828,14 @@ begin
 		enable => instruction_enabler(6),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(6),
 		memory_address => memory_address_multiply,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_multiply,
 		memory_operation => memory_operation_multiply,
 		memory_ready => memory_ready,
 		register_address => register_address_multiply,
+		register_operation => register_operation_multiply,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_multiply,
 		register_enable => register_enable_multiply,
@@ -860,13 +848,14 @@ begin
 		enable => instruction_enabler(7),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(7),
 		memory_address => memory_address_divide,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_divide,
 		memory_operation => memory_operation_divide,
 		memory_ready => memory_ready,
 		register_address => register_address_divide,
+		register_operation => register_operation_divide,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_divide,
 		register_enable => register_enable_divide,
@@ -879,13 +868,14 @@ begin
 		enable => instruction_enabler(8),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(8),
 		memory_address => memory_address_bitwiseand,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_bitwiseand,
 		memory_operation => memory_operation_bitwiseand,
 		memory_ready => memory_ready,
 		register_address => register_address_bitwiseand,
+		register_operation => register_operation_bitwiseand,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_bitwiseand,
 		register_enable => register_enable_bitwiseand,
@@ -898,13 +888,14 @@ begin
 		enable => instruction_enabler(9),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(9),
 		memory_address => memory_address_bitwiseor,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_bitwiseor,
 		memory_operation => memory_operation_bitwiseor,
 		memory_ready => memory_ready,
 		register_address => register_address_bitwiseor,
+		register_operation => register_operation_bitwiseor,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_bitwiseor,
 		register_enable => register_enable_bitwiseor,
@@ -917,13 +908,14 @@ begin
 		enable => instruction_enabler(10),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(10),
 		memory_address => memory_address_bitwisenand,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_bitwisenand,
 		memory_operation => memory_operation_bitwisenand,
 		memory_ready => memory_ready,
 		register_address => register_address_bitwisenand,
+		register_operation => register_operation_bitwisenand,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_bitwisenand,
 		register_enable => register_enable_bitwisenand,
@@ -936,13 +928,14 @@ begin
 		enable => instruction_enabler(11),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(11),
 		memory_address => memory_address_bitwisenor,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_bitwisenor,
 		memory_operation => memory_operation_bitwisenor,
 		memory_ready => memory_ready,
 		register_address => register_address_bitwisenor,
+		register_operation => register_operation_bitwisenor,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_bitwisenor,
 		register_enable => register_enable_bitwisenor,
@@ -955,13 +948,14 @@ begin
 		enable => instruction_enabler(12),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(12),
 		memory_address => memory_address_bitwisexor,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_bitwisexor,
 		memory_operation => memory_operation_bitwisexor,
 		memory_ready => memory_ready,
 		register_address => register_address_bitwisexor,
+		register_operation => register_operation_bitwisexor,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_bitwisexor,
 		register_enable => register_enable_bitwisexor,
@@ -974,13 +968,14 @@ begin
 		enable => instruction_enabler(13),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(13),
 		memory_address => memory_address_bitwisenot,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_bitwisenot,
 		memory_operation => memory_operation_bitwisenot,
 		memory_ready => memory_ready,
 		register_address => register_address_bitwisenot,
+		register_operation => register_operation_bitwisenot,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_bitwisenot,
 		register_enable => register_enable_bitwisenot,
@@ -993,13 +988,14 @@ begin
 		enable => instruction_enabler(14),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(14),
 		memory_address => memory_address_greaterthan,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_greaterthan,
 		memory_operation => memory_operation_greaterthan,
 		memory_ready => memory_ready,
 		register_address => register_address_greaterthan,
+		register_operation => register_operation_greaterthan,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_greaterthan,
 		register_enable => register_enable_greaterthan,
@@ -1012,13 +1008,14 @@ begin
 		enable => instruction_enabler(15),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(15),
 		memory_address => memory_address_greaterorequalthan,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_greaterorequalthan,
 		memory_operation => memory_operation_greaterorequalthan,
 		memory_ready => memory_ready,
 		register_address => register_address_greaterorequalthan,
+		register_operation => register_operation_greaterorequalthan,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_greaterorequalthan,
 		register_enable => register_enable_greaterorequalthan,
@@ -1031,13 +1028,14 @@ begin
 		enable => instruction_enabler(16),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(16),
 		memory_address => memory_address_lessthan,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_lessthan,
 		memory_operation => memory_operation_lessthan,
 		memory_ready => memory_ready,
 		register_address => register_address_lessthan,
+		register_operation => register_operation_lessthan,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_lessthan,
 		register_enable => register_enable_lessthan,
@@ -1050,13 +1048,14 @@ begin
 		enable => instruction_enabler(17),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(17),
 		memory_address => memory_address_lessorequalthan,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_lessorequalthan,
 		memory_operation => memory_operation_lessorequalthan,
 		memory_ready => memory_ready,
 		register_address => register_address_lessorequalthan,
+		register_operation => register_operation_lessorequalthan,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_lessorequalthan,
 		register_enable => register_enable_lessorequalthan,
@@ -1069,13 +1068,14 @@ begin
 		enable => instruction_enabler(18),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(18),
 		memory_address => memory_address_equal,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_equal,
 		memory_operation => memory_operation_equal,
 		memory_ready => memory_ready,
 		register_address => register_address_equal,
+		register_operation => register_operation_equal,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_equal,
 		register_enable => register_enable_equal,
@@ -1088,13 +1088,14 @@ begin
 		enable => instruction_enabler(19),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(19),
 		memory_address => memory_address_notequal,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_notequal,
 		memory_operation => memory_operation_notequal,
 		memory_ready => memory_ready,
 		register_address => register_address_notequal,
+		register_operation => register_operation_notequal,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_notequal,
 		register_enable => register_enable_notequal,
@@ -1107,13 +1108,14 @@ begin
 		enable => instruction_enabler(20),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(20),
 		memory_address => memory_address_jump,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_jump,
 		memory_operation => memory_operation_jump,
 		memory_ready => memory_ready,
 		register_address => register_address_jump,
+		register_operation => register_operation_jump,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_jump,
 		register_enable => register_enable_jump,
@@ -1126,13 +1128,14 @@ begin
 		enable => instruction_enabler(21),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(21),
 		memory_address => memory_address_jumpifcarry,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_jumpifcarry,
 		memory_operation => memory_operation_jumpifcarry,
 		memory_ready => memory_ready,
 		register_address => register_address_jumpifcarry,
+		register_operation => register_operation_jumpifcarry,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_jumpifcarry,
 		register_enable => register_enable_jumpifcarry,
@@ -1145,13 +1148,14 @@ begin
 		enable => instruction_enabler(22),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
-		instruction_ready => instruction_ready,
+		instruction_ready => instruction_ready(22),
 		memory_address => memory_address_halt,
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_halt,
 		memory_operation => memory_operation_halt,
 		memory_ready => memory_ready,
 		register_address => register_address_halt,
+		register_operation => register_operation_halt,
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_halt,
 		register_enable => register_enable_halt,
@@ -1395,25 +1399,222 @@ begin
 						when others =>
 							instruction_enabler <= (others => '0');
 					end case;
-
-					-- TODO
 					state <= wait_execute;
 
 				when wait_execute =>
-					--	TODO
-					if instruction_ready = '1' then
-						-- disable all executors
-						instruction_enabler <= (others => '0');
-
-						mux_disabled <= '1';
-						
-						-- start reading next instruction
-						state <= read_memory0;
-					else
-						-- keep waiting...
-						state <= wait_execute;
-					end if;
-
+				
+					case current_instruction.opcode is
+						-- [[[cog
+						--import re
+						--
+						--content = [line.rstrip('\n') for line in open('instructions.txt')]
+						--counter=0;
+						--for line in content:
+						--	cog.outl("when {0} => ".format(re.sub('([a-z0-9])([A-Z])', r'\1_\2', re.sub('(.)([A-Z][a-z]+)', r'\1_\2', line)).upper(), counter))
+						--	cog.outl("\tif instruction_ready({0}) = '1' then".format(counter))
+						--	cog.outl("\t\tinstruction_enabler <= (others => '0');")
+						--	cog.outl("\t\tmux_disabled <= '1';")
+						--	cog.outl("\t\tstate <= read_memory0;")
+						--	cog.outl("\telse")
+						--	cog.outl("\t\tstate <= wait_execute;")
+						--	cog.outl("\tend if;")
+						--	counter = counter + 1
+						--]]]
+						when LOAD => 
+							if instruction_ready(0) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when STORE => 
+							if instruction_ready(1) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when WRITE_IO => 
+							if instruction_ready(2) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when READ_IO => 
+							if instruction_ready(3) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when ADD => 
+							if instruction_ready(4) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when SUBTRACT => 
+							if instruction_ready(5) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when MULTIPLY => 
+							if instruction_ready(6) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when DIVIDE => 
+							if instruction_ready(7) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when BITWISE_AND => 
+							if instruction_ready(8) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when BITWISE_OR => 
+							if instruction_ready(9) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when BITWISE_NAND => 
+							if instruction_ready(10) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when BITWISE_NOR => 
+							if instruction_ready(11) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when BITWISE_XOR => 
+							if instruction_ready(12) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when BITWISE_NOT => 
+							if instruction_ready(13) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when GREATER_THAN => 
+							if instruction_ready(14) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when GREATER_OR_EQUAL_THAN => 
+							if instruction_ready(15) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when LESS_THAN => 
+							if instruction_ready(16) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when LESS_OR_EQUAL_THAN => 
+							if instruction_ready(17) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when EQUAL => 
+							if instruction_ready(18) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when NOT_EQUAL => 
+							if instruction_ready(19) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when JUMP => 
+							if instruction_ready(20) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when JUMP_IF_CARRY => 
+							if instruction_ready(21) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when HALT => 
+							if instruction_ready(22) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						when RESET => 
+							if instruction_ready(23) = '1' then
+								instruction_enabler <= (others => '0');
+								mux_disabled <= '1';
+								state <= read_memory0;
+							else
+								state <= wait_execute;
+							end if;
+						-- [[[end]]]
+					end case;
+					
 			end case;
 		end if;
 	end process;

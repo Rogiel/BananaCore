@@ -35,8 +35,8 @@ template_vars = {
 
 output_file = "{0}/{1}.vhd".format(output_directory, template_vars['EntityName']);
 
-# if os.path.exists(output_file):
-#     print("File {0} already exists... skipping.".format(output_file))
-# else:
-parse_template(current_path + "/__TEMPLATE__.vhd", "{0}/{1}.vhd".format(output_directory, template_vars['EntityName']), template_vars)
-    # print("Done.")
+if os.path.exists(output_file):
+    print("File {0} already exists... skipping.".format(output_file))
+else:
+    parse_template(current_path + "/__TEMPLATE__.vhd", "{0}/{1}.vhd".format(output_directory, template_vars['EntityName']), template_vars)
+    print("Done.")

@@ -31,7 +31,7 @@ entity LessThanInstructionExecutor is
 		arg1_address: in RegisterAddress;
 
 		-- a bus indicating if the instruction is ready or not
-		instruction_ready: inout std_logic;
+		instruction_ready: out std_logic;
 
 		------------------------------------------
 		-- MEMORY BUS
@@ -90,8 +90,8 @@ architecture LessThanInstructionExecutorImpl of LessThanInstructionExecutor is
 		store_arg1,
 
 		execute,
-
-		store_result
+		store_result,
+		complete
 	);
 	signal state: state_type := fetch_arg0;
 
@@ -139,11 +139,16 @@ begin
 						register_data_write <= result;
 						register_enable <= '1';
 
-						instruction_ready <= 'Z';
+						instruction_ready <= '1';
+						state <= complete;
+
+					when complete =>
+						state <= complete;
 				end case;
 
 			else
 				instruction_ready <= '0';
+				state <= fetch_arg0;
 			end if;
 		end if;
 	end process;

@@ -31,7 +31,7 @@ entity ReadIoInstructionExecutor is
 		arg1_address: in RegisterAddress;
 
 		-- a bus indicating if the instruction is ready or not
-		instruction_ready: inout std_logic;
+		instruction_ready: out std_logic;
 
 		------------------------------------------
 		-- MEMORY BUS
@@ -108,11 +108,13 @@ begin
 						register_data_write <= result;
 						register_enable <= '1';
 
-						instruction_ready <= 'Z';
+						instruction_ready <= '1';
+						state <= store_result;
 				end case;
 
 			else
 				instruction_ready <= '0';
+				state <= execute;
 			end if;
 		end if;
 	end process;
