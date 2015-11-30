@@ -88,7 +88,6 @@ set_global_assignment -name VHDL_FILE Source/Memory/MemoryController.vhd
 set_global_assignment -name VHDL_FILE Source/Memory/MemoryBank.vhd
 set_global_assignment -name VHDL_FILE Source/ClockController.vhd
 set_global_assignment -name VHDL_FILE Source/Register/RegisterController.vhd
-set_global_assignment -name VHDL_FILE Source/Memory/IOController.vhd
 set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim (Verilog)"
 set_global_assignment -name EDA_TIME_SCALE "1 ps" -section_id eda_simulation
 set_global_assignment -name EDA_OUTPUT_DATA_FORMAT "VERILOG HDL" -section_id eda_simulation

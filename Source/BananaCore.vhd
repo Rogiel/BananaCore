@@ -74,6 +74,9 @@ architecture BananaCoreImpl of BananaCore is
 	-- the processor memory operation signal
  	signal memory_operation: MemoryOperation;
 	
+	-- a signal that indicates if a memory operation should be performed
+	signal memory_enable: std_logic;	
+	
 	-- a signal that indicates if a memory operation has completed
 	signal memory_ready: std_logic;
 	
@@ -105,6 +108,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write,
 		operation => memory_operation,
+		enable => memory_enable,
 		ready => memory_ready
 	);
 	
@@ -125,6 +129,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write,
 		memory_operation => memory_operation,
+		memory_enable => memory_enable,
 		memory_ready => memory_ready,
 		
 		register_address => register_address,

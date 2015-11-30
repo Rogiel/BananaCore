@@ -55,7 +55,6 @@ library BananaCore;
 use BananaCore.Memory.all;
 use BananaCore.Core.all;
 use BananaCore.MemoryBank;
-use BananaCore.IOController;
 
 -- A gateway that controls access to the raw processor memory
 entity MemoryController is
@@ -74,6 +73,9 @@ entity MemoryController is
 		
 		-- the operation to perform on the memory
 		operation: in std_logic;
+		
+		-- a flag indicating that a operation should be performed
+		enable: in std_logic;
 		
 		-- a flag indicating that a operation has completed
 		ready: out std_logic
@@ -98,6 +100,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write,
 		operation => operation,
+		enable => enable,
 		ready => ready
 	);
 --	

@@ -31,23 +31,26 @@ entity BitwiseXorInstructionExecutor is
 		arg1_address: in RegisterAddress;
 
 		-- a bus indicating if the instruction is ready or not
-		instruction_ready: out std_logic;
+		instruction_ready: out std_logic := '0';
 
 		------------------------------------------
 		-- MEMORY BUS
 		------------------------------------------
 		-- the address to read/write memory from/to 
- 		memory_address: out MemoryAddress;
+ 		memory_address: out MemoryAddress := (others => '0');
  		 
  		-- the memory being read to
 		memory_data_read: in MemoryData;
 
  		-- the memory being written to
-		memory_data_write: out MemoryData;
+		memory_data_write: out MemoryData := (others => '0');
 
  		-- the operation to perform on the memory 
- 		memory_operation: out MemoryOperation;
+ 		memory_operation: out MemoryOperation := MEMORY_OP_DISABLED;
 		
+		-- a flag indicating if a memory operation should be performed
+ 		memory_enable: out std_logic;
+
 		-- a flag indicating if a memory operation has completed
  		memory_ready: in std_logic;
 		
@@ -55,19 +58,19 @@ entity BitwiseXorInstructionExecutor is
 		-- REGISTER BUS
 		------------------------------------------
 		-- the processor register address bus
-		register_address: out RegisterAddress;
+		register_address: out RegisterAddress := (others => '0');
 		
 		-- the processor register data bus
 		register_data_read: in RegisterData;
 
 		-- the processor register data bus
-		register_data_write: out RegisterData;
+		register_data_write: out RegisterData := (others => '0');
 		
 		-- the processor register operation signal
-		register_operation: out RegisterOperation;
+		register_operation: out RegisterOperation := OP_REG_DISABLED;
 		
 		-- the processor register enable signal
-		register_enable: out std_logic;
+		register_enable: out std_logic := '0';
 
 		------------------------------------------
 		-- IO ports
@@ -76,7 +79,7 @@ entity BitwiseXorInstructionExecutor is
 		port0: in MemoryData;
 
 		-- io port: port1
-		port1: out MemoryData
+		port1: out MemoryData := (others => '0')
 	);
 end BitwiseXorInstructionExecutor;
 

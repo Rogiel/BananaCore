@@ -1,31 +1,31 @@
-./generator.py Load
-./generator.py Store
+./generator.py Load --force
+./generator.py Store --force
 
 ./generator.py WriteIo
 ./generator.py ReadIo
 
-./generator.py Add
-./generator.py Subtract
-./generator.py Multiply
-./generator.py Divide
+./generator.py Add --force
+./generator.py Subtract --force
+./generator.py Multiply --force
+./generator.py Divide --force
 
-./generator.py BitwiseAnd
-./generator.py BitwiseOr
-./generator.py BitwiseNand
-./generator.py BitwiseNor
-./generator.py BitwiseXor
-./generator.py BitwiseNot
+./generator.py BitwiseAnd --force
+./generator.py BitwiseOr --force
+./generator.py BitwiseNand --force
+./generator.py BitwiseNor --force
+./generator.py BitwiseXor --force
+./generator.py BitwiseNot --force
 
-./generator.py GreaterThan
-./generator.py GreaterOrEqualThan
-./generator.py LessThan
-./generator.py LessOrEqualThan
-./generator.py Equal
-./generator.py NotEqual
+./generator.py GreaterThan --force
+./generator.py GreaterOrEqualThan --force
+./generator.py LessThan --force
+./generator.py LessOrEqualThan --force
+./generator.py Equal --force
+./generator.py NotEqual --force
 
-./generator.py Jump
-./generator.py JumpIfCarry
+./generator.py Jump --force
+./generator.py JumpIfCarry --force
 
-./generator.py Halt
-./generator.py Reset
+./generator.py Halt --force
+./generator.py Reset --force
 

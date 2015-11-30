@@ -47,6 +47,9 @@ entity WriteIoInstructionExecutor is
 
  		-- the operation to perform on the memory 
  		memory_operation: out MemoryOperation;
+				
+		-- a flag indicating if a memory operation should be performed
+ 		memory_enable: out std_logic;
 		
 		-- a flag indicating if a memory operation has completed
  		memory_ready: in std_logic;
@@ -87,7 +90,8 @@ architecture WriteIoInstructionExecutorImpl of WriteIoInstructionExecutor is
 		store_arg0,
 
 		execute,
-		store_result
+		store_result,
+		complete
 	);
 	signal state: state_type := fetch_arg0;
 
@@ -119,7 +123,10 @@ begin
 
 					when store_result =>
 						instruction_ready <= '1';
-						state <= store_result;
+						state <= complete;
+						
+					when complete =>
+						state <= complete;
 				end case;
 
 			else

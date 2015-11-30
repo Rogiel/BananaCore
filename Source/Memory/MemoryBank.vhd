@@ -35,6 +35,9 @@ entity MemoryBank is
 		-- the operation to perform on the memory
 		operation: in std_logic;
 		
+		-- a flag indicating that a operation should be performed
+		enable: in std_logic;
+		
 		-- a flag indicating that a operation has completed
 		ready: out std_logic
 	);
@@ -48,15 +51,18 @@ architecture MemoryBankImpl of MemoryBank is
 
 begin process (clock) begin
 	if clock'event and clock = '1' then
-		case operation is
-			when MEMORY_OP_READ  => 
-				memory_data_read <= storage(to_integer(address));
-				ready <= '1';
-			when MEMORY_OP_WRITE => 
-				storage(to_integer(address)) <= memory_data_write;
-				ready <= '1';
-		end case;
-		ready <= '0';
+		if enable = '1' then
+			case operation is
+				when MEMORY_OP_READ  => 
+					memory_data_read <= storage(to_integer(address));
+					ready <= '1';
+				when MEMORY_OP_WRITE => 
+					storage(to_integer(address)) <= memory_data_write;
+					ready <= '1';
+			end case;
+		else
+			ready <= '0';
+		end if;
 	end if;
 end process;
 	

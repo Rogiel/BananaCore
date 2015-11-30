@@ -72,6 +72,9 @@ entity InstructionController is
  		-- the operation to perform on the memory
  		memory_operation: out MemoryOperation;
 
+		-- a flag indicating if a memory operation should be performed
+ 		memory_enable: out std_logic;
+		
 		-- a flag indicating if a memory operation has completed
  		memory_ready: in std_logic;
 
@@ -134,21 +137,18 @@ architecture InstructionControllerImpl of InstructionController is
 	signal memory_address_local: MemoryAddress;
 	signal memory_data_write_local: MemoryData;
 	signal memory_operation_local: MemoryOperation;
+	signal memory_enable_local: std_logic;
 	signal memory_ready_local: std_logic;
 	signal register_address_local: RegisterAddress;
 	signal register_data_local: RegisterData;
 	signal register_operation_local: RegisterOperation;
 	signal register_enable_local: std_logic;
 	
-	attribute keep: boolean;
-	attribute keep of instruction_ready: signal is true;
-	attribute keep of instruction_data: signal is true;
-	attribute keep of current_instruction: signal is true;
-	
 	-- [[[cog
 	--content = [line.rstrip('\n') for line in open('instructions.txt')]
 	--for line in content:
 	--	cog.outl("signal memory_address_{0}: MemoryAddress;".format(line.lower()))
+	--	cog.outl("signal memory_enable_{0}: std_logic;".format(line.lower()))
 	--	cog.outl("signal memory_data_write_{0}: MemoryData;".format(line.lower()))
 	--	cog.outl("signal memory_operation_{0}: MemoryOperation;".format(line.lower()))
 	--	cog.outl("signal register_address_{0}: RegisterAddress;".format(line.lower()))
@@ -159,6 +159,7 @@ architecture InstructionControllerImpl of InstructionController is
 	-- 	cog.outl();
 	--]]]
 	signal memory_address_load: MemoryAddress;
+	signal memory_enable_load: std_logic;
 	signal memory_data_write_load: MemoryData;
 	signal memory_operation_load: MemoryOperation;
 	signal register_address_load: RegisterAddress;
@@ -168,6 +169,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_load: MemoryData;
 
 	signal memory_address_store: MemoryAddress;
+	signal memory_enable_store: std_logic;
 	signal memory_data_write_store: MemoryData;
 	signal memory_operation_store: MemoryOperation;
 	signal register_address_store: RegisterAddress;
@@ -177,6 +179,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_store: MemoryData;
 
 	signal memory_address_writeio: MemoryAddress;
+	signal memory_enable_writeio: std_logic;
 	signal memory_data_write_writeio: MemoryData;
 	signal memory_operation_writeio: MemoryOperation;
 	signal register_address_writeio: RegisterAddress;
@@ -186,6 +189,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_writeio: MemoryData;
 
 	signal memory_address_readio: MemoryAddress;
+	signal memory_enable_readio: std_logic;
 	signal memory_data_write_readio: MemoryData;
 	signal memory_operation_readio: MemoryOperation;
 	signal register_address_readio: RegisterAddress;
@@ -195,6 +199,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_readio: MemoryData;
 
 	signal memory_address_add: MemoryAddress;
+	signal memory_enable_add: std_logic;
 	signal memory_data_write_add: MemoryData;
 	signal memory_operation_add: MemoryOperation;
 	signal register_address_add: RegisterAddress;
@@ -204,6 +209,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_add: MemoryData;
 
 	signal memory_address_subtract: MemoryAddress;
+	signal memory_enable_subtract: std_logic;
 	signal memory_data_write_subtract: MemoryData;
 	signal memory_operation_subtract: MemoryOperation;
 	signal register_address_subtract: RegisterAddress;
@@ -213,6 +219,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_subtract: MemoryData;
 
 	signal memory_address_multiply: MemoryAddress;
+	signal memory_enable_multiply: std_logic;
 	signal memory_data_write_multiply: MemoryData;
 	signal memory_operation_multiply: MemoryOperation;
 	signal register_address_multiply: RegisterAddress;
@@ -222,6 +229,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_multiply: MemoryData;
 
 	signal memory_address_divide: MemoryAddress;
+	signal memory_enable_divide: std_logic;
 	signal memory_data_write_divide: MemoryData;
 	signal memory_operation_divide: MemoryOperation;
 	signal register_address_divide: RegisterAddress;
@@ -231,6 +239,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_divide: MemoryData;
 
 	signal memory_address_bitwiseand: MemoryAddress;
+	signal memory_enable_bitwiseand: std_logic;
 	signal memory_data_write_bitwiseand: MemoryData;
 	signal memory_operation_bitwiseand: MemoryOperation;
 	signal register_address_bitwiseand: RegisterAddress;
@@ -240,6 +249,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_bitwiseand: MemoryData;
 
 	signal memory_address_bitwiseor: MemoryAddress;
+	signal memory_enable_bitwiseor: std_logic;
 	signal memory_data_write_bitwiseor: MemoryData;
 	signal memory_operation_bitwiseor: MemoryOperation;
 	signal register_address_bitwiseor: RegisterAddress;
@@ -249,6 +259,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_bitwiseor: MemoryData;
 
 	signal memory_address_bitwisenand: MemoryAddress;
+	signal memory_enable_bitwisenand: std_logic;
 	signal memory_data_write_bitwisenand: MemoryData;
 	signal memory_operation_bitwisenand: MemoryOperation;
 	signal register_address_bitwisenand: RegisterAddress;
@@ -258,6 +269,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_bitwisenand: MemoryData;
 
 	signal memory_address_bitwisenor: MemoryAddress;
+	signal memory_enable_bitwisenor: std_logic;
 	signal memory_data_write_bitwisenor: MemoryData;
 	signal memory_operation_bitwisenor: MemoryOperation;
 	signal register_address_bitwisenor: RegisterAddress;
@@ -267,6 +279,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_bitwisenor: MemoryData;
 
 	signal memory_address_bitwisexor: MemoryAddress;
+	signal memory_enable_bitwisexor: std_logic;
 	signal memory_data_write_bitwisexor: MemoryData;
 	signal memory_operation_bitwisexor: MemoryOperation;
 	signal register_address_bitwisexor: RegisterAddress;
@@ -276,6 +289,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_bitwisexor: MemoryData;
 
 	signal memory_address_bitwisenot: MemoryAddress;
+	signal memory_enable_bitwisenot: std_logic;
 	signal memory_data_write_bitwisenot: MemoryData;
 	signal memory_operation_bitwisenot: MemoryOperation;
 	signal register_address_bitwisenot: RegisterAddress;
@@ -285,6 +299,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_bitwisenot: MemoryData;
 
 	signal memory_address_greaterthan: MemoryAddress;
+	signal memory_enable_greaterthan: std_logic;
 	signal memory_data_write_greaterthan: MemoryData;
 	signal memory_operation_greaterthan: MemoryOperation;
 	signal register_address_greaterthan: RegisterAddress;
@@ -294,6 +309,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_greaterthan: MemoryData;
 
 	signal memory_address_greaterorequalthan: MemoryAddress;
+	signal memory_enable_greaterorequalthan: std_logic;
 	signal memory_data_write_greaterorequalthan: MemoryData;
 	signal memory_operation_greaterorequalthan: MemoryOperation;
 	signal register_address_greaterorequalthan: RegisterAddress;
@@ -303,6 +319,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_greaterorequalthan: MemoryData;
 
 	signal memory_address_lessthan: MemoryAddress;
+	signal memory_enable_lessthan: std_logic;
 	signal memory_data_write_lessthan: MemoryData;
 	signal memory_operation_lessthan: MemoryOperation;
 	signal register_address_lessthan: RegisterAddress;
@@ -312,6 +329,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_lessthan: MemoryData;
 
 	signal memory_address_lessorequalthan: MemoryAddress;
+	signal memory_enable_lessorequalthan: std_logic;
 	signal memory_data_write_lessorequalthan: MemoryData;
 	signal memory_operation_lessorequalthan: MemoryOperation;
 	signal register_address_lessorequalthan: RegisterAddress;
@@ -321,6 +339,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_lessorequalthan: MemoryData;
 
 	signal memory_address_equal: MemoryAddress;
+	signal memory_enable_equal: std_logic;
 	signal memory_data_write_equal: MemoryData;
 	signal memory_operation_equal: MemoryOperation;
 	signal register_address_equal: RegisterAddress;
@@ -330,6 +349,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_equal: MemoryData;
 
 	signal memory_address_notequal: MemoryAddress;
+	signal memory_enable_notequal: std_logic;
 	signal memory_data_write_notequal: MemoryData;
 	signal memory_operation_notequal: MemoryOperation;
 	signal register_address_notequal: RegisterAddress;
@@ -339,6 +359,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_notequal: MemoryData;
 
 	signal memory_address_jump: MemoryAddress;
+	signal memory_enable_jump: std_logic;
 	signal memory_data_write_jump: MemoryData;
 	signal memory_operation_jump: MemoryOperation;
 	signal register_address_jump: RegisterAddress;
@@ -348,6 +369,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_jump: MemoryData;
 
 	signal memory_address_jumpifcarry: MemoryAddress;
+	signal memory_enable_jumpifcarry: std_logic;
 	signal memory_data_write_jumpifcarry: MemoryData;
 	signal memory_operation_jumpifcarry: MemoryOperation;
 	signal register_address_jumpifcarry: RegisterAddress;
@@ -357,6 +379,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_jumpifcarry: MemoryData;
 
 	signal memory_address_halt: MemoryAddress;
+	signal memory_enable_halt: std_logic;
 	signal memory_data_write_halt: MemoryData;
 	signal memory_operation_halt: MemoryOperation;
 	signal register_address_halt: RegisterAddress;
@@ -366,6 +389,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_halt: MemoryData;
 
 	signal memory_address_reset: MemoryAddress;
+	signal memory_enable_reset: std_logic;
 	signal memory_data_write_reset: MemoryData;
 	signal memory_operation_reset: MemoryOperation;
 	signal register_address_reset: RegisterAddress;
@@ -492,6 +516,41 @@ begin
 	-- [[[end]]]
 
 
+	memory_enable <=
+	memory_enable_local when mux_disabled = '1' else
+	-- [[[cog
+	--content = [line.rstrip('\n') for line in open('instructions.txt')]
+	--counter=0;
+	--for line in content[:-1]:
+	-- 	cog.outl("\tmemory_enable_{0} when instruction_enabler({1}) = '1' else".format(line.lower(), counter));
+	--	counter = counter + 1
+	--cog.outl("\tmemory_enable_{0} when instruction_enabler({1}) = '1';".format(content[-1].lower(), counter));
+	--]]]
+	memory_enable_load when instruction_enabler(0) = '1' else
+	memory_enable_store when instruction_enabler(1) = '1' else
+	memory_enable_writeio when instruction_enabler(2) = '1' else
+	memory_enable_readio when instruction_enabler(3) = '1' else
+	memory_enable_add when instruction_enabler(4) = '1' else
+	memory_enable_subtract when instruction_enabler(5) = '1' else
+	memory_enable_multiply when instruction_enabler(6) = '1' else
+	memory_enable_divide when instruction_enabler(7) = '1' else
+	memory_enable_bitwiseand when instruction_enabler(8) = '1' else
+	memory_enable_bitwiseor when instruction_enabler(9) = '1' else
+	memory_enable_bitwisenand when instruction_enabler(10) = '1' else
+	memory_enable_bitwisenor when instruction_enabler(11) = '1' else
+	memory_enable_bitwisexor when instruction_enabler(12) = '1' else
+	memory_enable_bitwisenot when instruction_enabler(13) = '1' else
+	memory_enable_greaterthan when instruction_enabler(14) = '1' else
+	memory_enable_greaterorequalthan when instruction_enabler(15) = '1' else
+	memory_enable_lessthan when instruction_enabler(16) = '1' else
+	memory_enable_lessorequalthan when instruction_enabler(17) = '1' else
+	memory_enable_equal when instruction_enabler(18) = '1' else
+	memory_enable_notequal when instruction_enabler(19) = '1' else
+	memory_enable_jump when instruction_enabler(20) = '1' else
+	memory_enable_jumpifcarry when instruction_enabler(21) = '1' else
+	memory_enable_halt when instruction_enabler(22) = '1' else
+	memory_enable_reset when instruction_enabler(23) = '1';
+	-- [[[end]]]
 
 	register_data_write <=
 	register_data_local when mux_disabled = '1' else
@@ -675,7 +734,7 @@ begin
 	-- [[[cog
 	--content = [line.rstrip('\n') for line in open('instructions.txt')]
 	--counter=0;
-	--for line in content[:-1]:
+	--for line in content:
 	--	template_vars = {
 	--		'LowerName': line.lower(),
 	--		'Name': line,
@@ -691,6 +750,7 @@ begin
 	-- 	cog.outl("\tmemory_data_read => memory_data_read,".format(**template_vars))
 	-- 	cog.outl("\tmemory_data_write => memory_data_write_{LowerName},".format(**template_vars))
 	-- 	cog.outl("\tmemory_operation => memory_operation_{LowerName},".format(**template_vars))
+	-- 	cog.outl("\tmemory_enable => memory_enable_{LowerName},".format(**template_vars))
 	-- 	cog.outl("\tmemory_ready => memory_ready,".format(**template_vars))
 	-- 	cog.outl("\tregister_address => register_address_{LowerName},".format(**template_vars))
 	-- 	cog.outl("\tregister_operation => register_operation_{LowerName},".format(**template_vars))
@@ -713,6 +773,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_load,
 		memory_operation => memory_operation_load,
+		memory_enable => memory_enable_load,
 		memory_ready => memory_ready,
 		register_address => register_address_load,
 		register_operation => register_operation_load,
@@ -733,6 +794,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_store,
 		memory_operation => memory_operation_store,
+		memory_enable => memory_enable_store,
 		memory_ready => memory_ready,
 		register_address => register_address_store,
 		register_operation => register_operation_store,
@@ -753,6 +815,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_writeio,
 		memory_operation => memory_operation_writeio,
+		memory_enable => memory_enable_writeio,
 		memory_ready => memory_ready,
 		register_address => register_address_writeio,
 		register_operation => register_operation_writeio,
@@ -773,6 +836,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_readio,
 		memory_operation => memory_operation_readio,
+		memory_enable => memory_enable_readio,
 		memory_ready => memory_ready,
 		register_address => register_address_readio,
 		register_operation => register_operation_readio,
@@ -793,6 +857,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_add,
 		memory_operation => memory_operation_add,
+		memory_enable => memory_enable_add,
 		memory_ready => memory_ready,
 		register_address => register_address_add,
 		register_operation => register_operation_add,
@@ -813,6 +878,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_subtract,
 		memory_operation => memory_operation_subtract,
+		memory_enable => memory_enable_subtract,
 		memory_ready => memory_ready,
 		register_address => register_address_subtract,
 		register_operation => register_operation_subtract,
@@ -833,6 +899,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_multiply,
 		memory_operation => memory_operation_multiply,
+		memory_enable => memory_enable_multiply,
 		memory_ready => memory_ready,
 		register_address => register_address_multiply,
 		register_operation => register_operation_multiply,
@@ -853,6 +920,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_divide,
 		memory_operation => memory_operation_divide,
+		memory_enable => memory_enable_divide,
 		memory_ready => memory_ready,
 		register_address => register_address_divide,
 		register_operation => register_operation_divide,
@@ -873,6 +941,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_bitwiseand,
 		memory_operation => memory_operation_bitwiseand,
+		memory_enable => memory_enable_bitwiseand,
 		memory_ready => memory_ready,
 		register_address => register_address_bitwiseand,
 		register_operation => register_operation_bitwiseand,
@@ -893,6 +962,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_bitwiseor,
 		memory_operation => memory_operation_bitwiseor,
+		memory_enable => memory_enable_bitwiseor,
 		memory_ready => memory_ready,
 		register_address => register_address_bitwiseor,
 		register_operation => register_operation_bitwiseor,
@@ -913,6 +983,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_bitwisenand,
 		memory_operation => memory_operation_bitwisenand,
+		memory_enable => memory_enable_bitwisenand,
 		memory_ready => memory_ready,
 		register_address => register_address_bitwisenand,
 		register_operation => register_operation_bitwisenand,
@@ -933,6 +1004,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_bitwisenor,
 		memory_operation => memory_operation_bitwisenor,
+		memory_enable => memory_enable_bitwisenor,
 		memory_ready => memory_ready,
 		register_address => register_address_bitwisenor,
 		register_operation => register_operation_bitwisenor,
@@ -953,6 +1025,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_bitwisexor,
 		memory_operation => memory_operation_bitwisexor,
+		memory_enable => memory_enable_bitwisexor,
 		memory_ready => memory_ready,
 		register_address => register_address_bitwisexor,
 		register_operation => register_operation_bitwisexor,
@@ -973,6 +1046,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_bitwisenot,
 		memory_operation => memory_operation_bitwisenot,
+		memory_enable => memory_enable_bitwisenot,
 		memory_ready => memory_ready,
 		register_address => register_address_bitwisenot,
 		register_operation => register_operation_bitwisenot,
@@ -993,6 +1067,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_greaterthan,
 		memory_operation => memory_operation_greaterthan,
+		memory_enable => memory_enable_greaterthan,
 		memory_ready => memory_ready,
 		register_address => register_address_greaterthan,
 		register_operation => register_operation_greaterthan,
@@ -1013,6 +1088,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_greaterorequalthan,
 		memory_operation => memory_operation_greaterorequalthan,
+		memory_enable => memory_enable_greaterorequalthan,
 		memory_ready => memory_ready,
 		register_address => register_address_greaterorequalthan,
 		register_operation => register_operation_greaterorequalthan,
@@ -1033,6 +1109,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_lessthan,
 		memory_operation => memory_operation_lessthan,
+		memory_enable => memory_enable_lessthan,
 		memory_ready => memory_ready,
 		register_address => register_address_lessthan,
 		register_operation => register_operation_lessthan,
@@ -1053,6 +1130,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_lessorequalthan,
 		memory_operation => memory_operation_lessorequalthan,
+		memory_enable => memory_enable_lessorequalthan,
 		memory_ready => memory_ready,
 		register_address => register_address_lessorequalthan,
 		register_operation => register_operation_lessorequalthan,
@@ -1073,6 +1151,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_equal,
 		memory_operation => memory_operation_equal,
+		memory_enable => memory_enable_equal,
 		memory_ready => memory_ready,
 		register_address => register_address_equal,
 		register_operation => register_operation_equal,
@@ -1093,6 +1172,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_notequal,
 		memory_operation => memory_operation_notequal,
+		memory_enable => memory_enable_notequal,
 		memory_ready => memory_ready,
 		register_address => register_address_notequal,
 		register_operation => register_operation_notequal,
@@ -1113,6 +1193,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_jump,
 		memory_operation => memory_operation_jump,
+		memory_enable => memory_enable_jump,
 		memory_ready => memory_ready,
 		register_address => register_address_jump,
 		register_operation => register_operation_jump,
@@ -1133,6 +1214,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_jumpifcarry,
 		memory_operation => memory_operation_jumpifcarry,
+		memory_enable => memory_enable_jumpifcarry,
 		memory_ready => memory_ready,
 		register_address => register_address_jumpifcarry,
 		register_operation => register_operation_jumpifcarry,
@@ -1153,6 +1235,7 @@ begin
 		memory_data_read => memory_data_read,
 		memory_data_write => memory_data_write_halt,
 		memory_operation => memory_operation_halt,
+		memory_enable => memory_enable_halt,
 		memory_ready => memory_ready,
 		register_address => register_address_halt,
 		register_operation => register_operation_halt,
@@ -1163,6 +1246,27 @@ begin
 		port1 => port1_halt
 	);
 
+	reset_instruction_executor: ResetInstructionExecutor port map(
+		clock => clock,
+		enable => instruction_enabler(23),
+		arg0_address => current_instruction.reg0,
+		arg1_address => current_instruction.reg1,
+		instruction_ready => instruction_ready(23),
+		memory_address => memory_address_reset,
+		memory_data_read => memory_data_read,
+		memory_data_write => memory_data_write_reset,
+		memory_operation => memory_operation_reset,
+		memory_enable => memory_enable_reset,
+		memory_ready => memory_ready,
+		register_address => register_address_reset,
+		register_operation => register_operation_reset,
+		register_data_read => register_data_read,
+		register_data_write => register_data_write_reset,
+		register_enable => register_enable_reset,
+		port0 => port0,
+		port1 => port1_reset
+	);
+
 	-- [[[end]]]
 
 	process(clock) begin
@@ -1171,10 +1275,14 @@ begin
 				when read_memory0 =>
 					memory_address_local <= integer_to_memory_address(program_counter);
 					memory_operation_local <= MEMORY_OP_READ;
+					memory_enable_local <= '1';
+					
 					state <= wait_memory0;
+					
 				when wait_memory0 =>
 					if memory_ready = '1' then
 						instruction_data(0 to 7) <= memory_data_read;
+						memory_enable_local <= '0';
 						state <= read_memory1;
 					else
 						state <= wait_memory0;
@@ -1183,10 +1291,14 @@ begin
 				when read_memory1 =>
 					memory_address_local <= integer_to_memory_address(program_counter + 1);
 					memory_operation_local <= MEMORY_OP_READ;
+					memory_enable_local <= '1';
+					
 					state <= wait_memory1;
+					
 				when wait_memory1 =>
 					if memory_ready = '1' then
 						instruction_data(8 to 15) <= memory_data_read;
+						memory_enable_local <= '0';
 						state <= read_memory2;
 					else
 						state <= wait_memory1;
@@ -1195,18 +1307,20 @@ begin
 				when read_memory2 =>
 					memory_address_local <= integer_to_memory_address(program_counter + 2);
 					memory_operation_local <= MEMORY_OP_READ;
+					memory_enable_local <= '1';
 					state <= wait_memory2;
+					
 				when wait_memory2 =>
 					if memory_ready = '1' then
 						instruction_data(16 to 23) <= memory_data_read;
+						memory_enable_local <= '0';
 						state <= decode_instruction;
 					else
 						state <= wait_memory2;
 					end if;
 
 				when decode_instruction =>
-					-- TODO
-					state <= execute;
+					memory_enable_local <= '0';
 
 					case instruction_data(0 to 7) is
 						when "00000000" =>
@@ -1355,6 +1469,8 @@ begin
 							current_instruction.opcode <= HALT;
 							current_instruction.size <= 1;
 					end case;
+					
+					state <= execute;
 				when execute =>
 					mux_disabled <= '0';
 					program_counter <= program_counter + current_instruction.size;
