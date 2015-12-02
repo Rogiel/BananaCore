@@ -144,6 +144,11 @@ architecture InstructionControllerImpl of InstructionController is
 	signal register_operation_local: RegisterOperation;
 	signal register_enable_local: std_logic;
 	
+	attribute keep: boolean;
+	attribute keep of instruction_ready: signal is true;
+	attribute keep of instruction_data: signal is true;
+	attribute keep of current_instruction: signal is true;
+	
 	-- [[[cog
 	--content = [line.rstrip('\n') for line in open('instructions.txt')]
 	--for line in content:

@@ -9,6 +9,7 @@ library ieee;
 use ieee.numeric_std.all;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_1164.std_logic;
+use ieee.NUMERIC_STD.all;
 
 library BananaCore;
 use BananaCore.Core.all;
@@ -134,6 +135,7 @@ begin
 
 					when execute =>
 						-- TODO implement instruction here
+						result <= std_logic_vector(unsigned(arg0) - unsigned(arg1));
 						state <= store_result;
 
 					when store_result =>
