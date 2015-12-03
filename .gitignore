@@ -11,3 +11,5 @@ cycloneii
 # Ignore IntelliJ & Eclipse files
 .idea
 .metadata
+*.rpt
+qsim

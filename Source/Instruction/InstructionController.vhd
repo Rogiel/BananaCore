@@ -110,10 +110,10 @@ entity InstructionController is
 end InstructionController;
 
 architecture InstructionControllerImpl of InstructionController is
-	signal instruction_data: std_logic_vector(0 to 23);
+	signal instruction_data: std_logic_vector(0 to 31);
 	signal current_instruction: DecodedInstruction;
 
-	signal program_counter: integer;
+	signal program_counter: integer := 0;
 
 	type state_type is (
 		read_memory0,
@@ -122,6 +122,8 @@ architecture InstructionControllerImpl of InstructionController is
 		wait_memory1,
 		read_memory2,
 		wait_memory2,
+		read_memory3,
+		wait_memory3,
 
 		decode_instruction,
 		-- wait_decode_instruction,
@@ -148,6 +150,8 @@ architecture InstructionControllerImpl of InstructionController is
 	attribute keep of instruction_ready: signal is true;
 	attribute keep of instruction_data: signal is true;
 	attribute keep of current_instruction: signal is true;
+	
+	attribute keep of state: signal is true;
 	
 	-- [[[cog
 	--content = [line.rstrip('\n') for line in open('instructions.txt')]
@@ -736,7 +740,7 @@ begin
 	port1_reset when instruction_enabler(23) = '1';
 	-- [[[end]]]
 
-	-- [[[cog
+	-- [[--[cog
 	--content = [line.rstrip('\n') for line in open('instructions.txt')]
 	--counter=0;
 	--for line in content:
@@ -767,12 +771,13 @@ begin
 	--	cog.outl(");".format(**template_vars))
 	--	cog.outl()
 	--	counter = counter + 1
-	--]]]
+	--]]--]
 	load_instruction_executor: LoadInstructionExecutor port map(
 		clock => clock,
 		enable => instruction_enabler(0),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
+		arg2_address => current_instruction.address,
 		instruction_ready => instruction_ready(0),
 		memory_address => memory_address_load,
 		memory_data_read => memory_data_read,
@@ -794,6 +799,7 @@ begin
 		enable => instruction_enabler(1),
 		arg0_address => current_instruction.reg0,
 		arg1_address => current_instruction.reg1,
+		arg2_address => current_instruction.address,
 		instruction_ready => instruction_ready(1),
 		memory_address => memory_address_store,
 		memory_data_read => memory_data_read,
@@ -1272,7 +1278,7 @@ begin
 		port1 => port1_reset
 	);
 
-	-- [[[end]]]
+	-- [[[--end]]]
 
 	process(clock) begin
 		if clock'event and clock = '1' then
@@ -1319,9 +1325,24 @@ begin
 					if memory_ready = '1' then
 						instruction_data(16 to 23) <= memory_data_read;
 						memory_enable_local <= '0';
-						state <= decode_instruction;
+						state <= read_memory3;
 					else
 						state <= wait_memory2;
+					end if;
+					
+				when read_memory3 =>
+					memory_address_local <= integer_to_memory_address(program_counter + 3);
+					memory_operation_local <= MEMORY_OP_READ;
+					memory_enable_local <= '1';
+					state <= wait_memory3;
+					
+				when wait_memory3 =>
+					if memory_ready = '1' then
+						instruction_data(24 to 31) <= memory_data_read;
+						memory_enable_local <= '0';
+						state <= decode_instruction;
+					else
+						state <= wait_memory3;
 					end if;
 
 				when decode_instruction =>
@@ -1334,8 +1355,7 @@ begin
 
 							current_instruction.reg0 <= unsigned(instruction_data(8 to 11));
 							current_instruction.reg1 <= unsigned(instruction_data(12 to 15));
-
-							-- FIXME need to increase buffer
+							current_instruction.address <= unsigned(instruction_data(16 to 31));
 
 						when "00000001" =>
 							current_instruction.opcode <= STORE;
@@ -1343,6 +1363,7 @@ begin
 
 							current_instruction.reg0 <= (unsigned(instruction_data(8 to 11)));
 							current_instruction.reg1 <= (unsigned(instruction_data(12 to 15)));
+							current_instruction.address <= unsigned(instruction_data(16 to 31));
 
 						when "00000010" =>
 							current_instruction.opcode <= WRITE_IO;

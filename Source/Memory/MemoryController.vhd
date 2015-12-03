@@ -93,7 +93,7 @@ architecture MemoryControllerImpl of MemoryController is
 
 begin
 	memory_bank: MemoryBank
-	generic map(Size => 256 * 1024)
+	generic map(Size => 512)
 	port map(
 		clock => clock,
 		address => address,

@@ -29,7 +29,10 @@ entity LoadInstructionExecutor is
 
 		-- the first register to operate on (argument 1)
 		arg1_address: in RegisterAddress;
-
+				
+		-- the address to operate on (argument 2)
+		arg2_address: in MemoryAddress;
+		
 		-- a bus indicating if the instruction is ready or not
 		instruction_ready: out std_logic := '0';
 
@@ -86,17 +89,16 @@ end LoadInstructionExecutor;
 architecture LoadInstructionExecutorImpl of LoadInstructionExecutor is
 
 	type state_type is (
-		fetch_arg0,
-		store_arg0,
+		fetch_mem0,
+		store_mem0,
 
-		fetch_arg1,
-		store_arg1,
+		fetch_mem1,
+		store_mem1,
 
-		execute,
 		store_result,
 		complete
 	);
-	signal state: state_type := fetch_arg0;
+	signal state: state_type := fetch_mem0;
 
 	signal arg0: RegisterData;
 	signal arg1: RegisterData;
@@ -108,36 +110,44 @@ begin
 			if enable = '1' then
 
 				case state is
-					when fetch_arg0 =>
+					when fetch_mem0 =>
 						instruction_ready <= '0';
 
-						register_address <= arg0_address;
-						register_operation <= OP_REG_GET;
-						register_enable <= '1';
-						state <= store_arg0;
+						memory_address <= arg2_address;
+						memory_operation <= MEMORY_OP_READ;
+						memory_enable <= '1';
+						
+						state <= store_mem0;
 
-					when store_arg0 =>
-						arg0 <= register_data_read;
-						state <= fetch_arg1;
+					when store_mem0 =>
+						if memory_ready = '1' then
+							result(7 downto 0) <= memory_data_read;
+							memory_enable <= '0';
+							state <= fetch_mem1;
+						else
+							state <= store_mem0;
+						end if;
 
-					when fetch_arg1 =>
-						register_address <= arg1_address;
-						register_operation <= OP_REG_GET;
-						register_enable <= '1';
-						state <= store_arg1;
+					when fetch_mem1 =>
+						instruction_ready <= '0';
 
-					when store_arg1 =>
-						arg1 <= register_data_read;
-						state <= execute;
+						memory_address <= arg2_address + 1;
+						memory_operation <= MEMORY_OP_READ;
+						memory_enable <= '1';
+						
+						state <= store_mem1;
 
-						register_enable <= '0';
-
-					when execute =>
-						-- TODO implement instruction here
-						state <= store_result;
+					when store_mem1 =>
+						if memory_ready = '1' then
+							result(8 downto 15) <= memory_data_read;
+							memory_enable <= '0';
+							state <= store_result;
+						else
+							state <= store_mem1;
+						end if;
 
 					when store_result =>
-						register_address <= AccumulatorRegister;
+						register_address <= arg1_address;
 						register_operation <= OP_REG_SET;
 						register_data_write <= result;
 						register_enable <= '1';
@@ -151,9 +161,9 @@ begin
 
 			else
 				instruction_ready <= '0';
-				state <= fetch_arg0;
+				state <= fetch_mem0;
 			end if;
 		end if;
 	end process;
-
+	
 end LoadInstructionExecutorImpl;

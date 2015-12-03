@@ -29,6 +29,9 @@ entity StoreInstructionExecutor is
 
 		-- the first register to operate on (argument 1)
 		arg1_address: in RegisterAddress;
+		
+		-- the address to operate on (argument 2)
+		arg2_address: in MemoryAddress;
 
 		-- a bus indicating if the instruction is ready or not
 		instruction_ready: out std_logic := '0';
@@ -86,17 +89,18 @@ end StoreInstructionExecutor;
 architecture StoreInstructionExecutorImpl of StoreInstructionExecutor is
 
 	type state_type is (
-		fetch_arg0,
-		store_arg0,
-
 		fetch_arg1,
 		store_arg1,
 
-		execute,
-		store_result,
+		store_result0,
+		wait_result0,
+		
+		store_result1,
+		wait_result1,
+
 		complete
 	);
-	signal state: state_type := fetch_arg0;
+	signal state: state_type := fetch_arg1;
 
 	signal arg0: RegisterData;
 	signal arg1: RegisterData;
@@ -108,18 +112,6 @@ begin
 			if enable = '1' then
 
 				case state is
-					when fetch_arg0 =>
-						instruction_ready <= '0';
-
-						register_address <= arg0_address;
-						register_operation <= OP_REG_GET;
-						register_enable <= '1';
-						state <= store_arg0;
-
-					when store_arg0 =>
-						arg0 <= register_data_read;
-						state <= fetch_arg1;
-
 					when fetch_arg1 =>
 						register_address <= arg1_address;
 						register_operation <= OP_REG_GET;
@@ -128,30 +120,50 @@ begin
 
 					when store_arg1 =>
 						arg1 <= register_data_read;
-						state <= execute;
+						state <= store_result0;
 
 						register_enable <= '0';
 
-					when execute =>
-						-- TODO implement instruction here
-						state <= store_result;
+					when store_result0 =>
+						memory_address <= arg2_address;
+						memory_operation <= MEMORY_OP_WRITE;
+						memory_data_write <= result(7 downto 0);
+						memory_enable <= '1';
 
-					when store_result =>
-						register_address <= AccumulatorRegister;
-						register_operation <= OP_REG_SET;
-						register_data_write <= result;
-						register_enable <= '1';
+						state <= wait_result0;
+						
+					when wait_result0 =>
+						if memory_ready = '1' then
+							state <= wait_result0;
+							memory_enable <= '0';
+						else
+							state <= store_result0;
+						end if;
 
-						instruction_ready <= '1';
-						state <= complete;
+					when store_result1 =>
+						memory_address <= arg2_address;
+						memory_operation <= MEMORY_OP_WRITE;
+						memory_data_write <= result(7 downto 0);
+						memory_enable <= '1';
 
+						state <= wait_result1;
+						
+					when wait_result1 =>
+						if memory_ready = '1' then
+							state <= complete;
+							memory_enable <= '0';
+						else
+							state <= store_result0;
+						end if;
+						
 					when complete =>
+						instruction_ready <= '1';
 						state <= complete;
 				end case;
 
 			else
 				instruction_ready <= '0';
-				state <= fetch_arg0;
+				state <= fetch_arg1;
 			end if;
 		end if;
 	end process;

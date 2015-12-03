@@ -39,7 +39,7 @@ entity MemoryBank is
 		enable: in std_logic;
 		
 		-- a flag indicating that a operation has completed
-		ready: out std_logic
+		ready: out std_logic := '0'
 	);
 	
 end MemoryBank;
@@ -47,7 +47,63 @@ end MemoryBank;
 architecture MemoryBankImpl of MemoryBank is
 
 	type MemoryBankStorage is array (0 to Size-1) of MemoryData;
-   signal storage : MemoryBankStorage;
+   signal storage : MemoryBankStorage := (
+		-- LOAD
+		"00000000",
+		"00100000",
+		"00000000",
+		"00001000",
+		
+		--LOAD
+		"00000000",
+		"00100001",
+		"00000000",
+		"00000000",
+		
+		--LOAD
+		"00000000",
+		"00100010",
+		"00000000",
+		"00000001",
+		
+		--LOAD
+		"00000000",
+		"00100011",
+		"00000000",
+		"00000001",
+		
+		-- MULTIPLY
+		"00010010",
+		"00100000",
+		
+		-- LOAD
+		"00000000",
+		"00000010",
+		"00001110",
+		"00010001",
+		
+		-- SUBTRACT
+		"00000011",
+		"00000000",
+		
+		-- LOAD
+		"00000000",
+		"00001110",
+		
+		-- COMPARE !=
+		"00110101",
+		"00000001",
+		
+		-- JUMP IF CARRY
+		"00100010",
+		"00000000",
+		"00010000",
+		
+		-- HALT
+		"11111110",
+		
+		others => "00000000"
+	);
 
 begin process (clock) begin
 	if clock'event and clock = '1' then

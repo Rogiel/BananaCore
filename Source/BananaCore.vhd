@@ -80,6 +80,14 @@ architecture BananaCoreImpl of BananaCore is
 	-- a signal that indicates if a memory operation has completed
 	signal memory_ready: std_logic;
 	
+	attribute keep: boolean;
+	attribute keep of memory_address: signal is true;
+	attribute keep of memory_data_read: signal is true;
+	attribute keep of memory_data_write: signal is true;
+	attribute keep of memory_operation: signal is true;
+	attribute keep of memory_enable: signal is true;
+	attribute keep of memory_ready: signal is true;
+	
 	------------------------------------------
 	-- REGISTER BUS
 	------------------------------------------
@@ -98,6 +106,12 @@ architecture BananaCoreImpl of BananaCore is
 	
 	-- the processor register operation signal
  	signal register_enable: std_logic;
+	
+	attribute keep of register_address: signal is true;
+	attribute keep of register_data_read: signal is true;
+	attribute keep of register_data_write: signal is true;
+	attribute keep of register_operation: signal is true;
+	attribute keep of register_enable: signal is true;
 	
 begin
 	
