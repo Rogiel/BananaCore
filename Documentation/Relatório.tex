@@ -23,7 +23,7 @@
 
 \chapter{Especificação}
 
-A especificação inicial para o nosso projeto consiste em um processador de arquitetura do tipo Von Neumann\footnote{A arquitetura Von Neumann consiste em uma única memória compartilhada tanto para dados como para programas.} com instruções básicas do tipo:
+A especificação inicial para o nosso projeto consiste em um processador de arquitetura do tipo Von Neumann\footnote{A arquitetura Von Neumann consiste em uma única memória compartilhada tanto para dados como para programas.} de 16 bits com instruções básicas do tipo:
 
 \begin{itemize}
 	\item Operações de memória: Carregar dado da memória, armazenar dado na memória
@@ -42,7 +42,21 @@ Sabendo da limitação desta implementação, o design deve permitir que seja f�
 \label{sec:MemoryController}
 O controlador de memória é a unidade que faz o intermédio ao acesso a memória do processador; nele, a operação de escrita é validada e então enviada para um respectivo memory bank (ver seção \ref{sec:MemoryBank}).
 
-\todo{Descrever o funcionamento básico do controlador}
+O controlador é operado utilizando $7$ sinais:
+
+\begin{description}
+	\item[Endereço (entrada)] Recebe um valor de 16 bits que representa o endereço que memória que se deseja operar
+	\item[Leitura de dados (saída)] Retorna o valor equivalente ao byte armazenado no endereço solicitado ou alta impedância (caso esteja executando uma operação se escrita)
+	\item[Escrita de dados (entrada)] Recebe o byte que deseja-se escrever na memória
+	\item[Operação (entrada)] Indica a operação desejada na memória RAM (escrita ou leitura)
+	\item[Pronto (saída)] Uma flag que indica que a operação de leitura/escrita foi concluída com sucesso.
+\end{description}
+
+\subsection{Leitura na memória RAM}
+Para ler um byte da memória RAM, primeiramente seleciona-se o endereço desejado e atribui-se este valor ao barramento de endereços. Em seguida, o bit de operação é definido em modo leitura e aguarda-se um número arbitrário de clocks até que o sinal de pronto transicione para nível alto. No instante em que este sinal transiciona, o dado já está disponível na porta de leitura.
+
+\subsection{Escrita na memória RAM}
+Para escrever um byte na memória RAM, primeiramente seleciona-se o endereço desejado e atribui-se este valor ao barramento de endereços. Em seguida, no barramento de escrita de dados, o valor do byte é atribuido e o bit de operaçao é definido para uma operaçao do tipo \emph{WRITE}. Devido ao fato da memória RAM possuir um clock diferenciado do processador central, é necessário aguardar um intervalo arbitrário de ciclos de clock até que o sinal de pronto seja colocado em alto. Neste momento, já é possível iniciar a escrita do próximo byte da mesma maneira.
 
 \subsection{Memory Bank}
 \label{sec:MemoryBank}
@@ -60,26 +74,35 @@ O controlador de instruções é, sem dúvida, uma das partes com maior quantida
 
 \subsection{Executor de instruções}
 \label{sec:InstructionExecutor}
-Cada instrução foi dividida em uma entidade chamada de \emph{executor}. Esta entidade é responsável por fazer o carregamento de dados, execução da instrução e armazenamento do resultado final. Devido a repetição de código nestes executores, utilizamos geradores para gerar grande parte do código de forma automática e simples (ver seção \ref{CodeGeneration}).
+Cada instrução foi dividida em uma entidade chamada de \emph{executor}. Esta entidade é responsável por fazer o carregamento de dados, execução da instrução e armazenamento do resultado final. Devido a repetição de código nestes executores, utilizamos geradores para gerar grande parte do código de forma automática e simples (ver seção \ref{sec:CodeGeneration}).
 
 \subsection{Acesso à memória}
 \label{sec:MemoryAccess}
 
 Inicialmente, pretendíamos implementar o acesso global a memória por via de um barramento delimitado por \emph{buffers tri-state}, contudo, esta implementação se mostrou muito complexa, pois ao incrementar as implementações de instruções do processador o barramento entrava em um estado inválido pois mais de dois sinais tentavam ser escritos no barramento em simultâneo. Acreditamos que estes problemas são devidos a falhas de design da arquitetura e que poderiam ser resolvidas escolhendo uma forma alternativa de implementação das instruções.
 
-A solução desde problema, embora não seja ideal, foi simples: um grande MUX foi implementado de forma a fazer o "controle" de acesso ao barramento principal. Esta solução tem um grave problema: a necessidade de escrever código cresce muito em função da quantidade de instruções implementadas. Para um processador simples como o BananaCore isto pode não ser um problema muito relevante; mas para implementações maiores isto pode ganhar uma faceta muito mais adversa. Como forma de solucionar, parcialmente, este empecilho, fizemos uso de artefatos de geração de código para gerar os muxes e demais condições do decodificador de instruções.
+A solução desde problema, embora não seja ideal, foi simples: um grande MUX foi implementado de forma a fazer o "controle" de acesso ao barramento principal. Esta solução tem um grave problema: a necessidade de escrever código cresce muito em função da quantidade de instruções implementadas. Para um processador simples como o BananaCore isto pode não ser um problema muito relevante; mas para implementações maiores isto pode ganhar uma faceta muito mais adversa. Como forma de solucionar, parcialmente, este empecilho, fizemos uso de artefatos de geração de código para gerar os muxes e demais condições do decodificador de instruções (ver seção \ref{sec:CodeGeneration}).
 
 \todo{Detalhar a implementação atual}
 
-\subsection{Geração de código}
+\section{Geração de código}
 \label{sec:CodeGeneration}
-Para gerar os códigos repetitivos e forma algorítmica, fizemos usos de duas ferramentas distintas: Cog\footnote{Cog é um aplicativo que executa códigos Python contidos em comentários do código fonte e substitui sua saída ao final da execução. O programa está disponível publicamente \mbox{em \url{http://nedbatchelder.com/code/cog/}}} e um script personalizado de geração de executores de instruções.
+Para gerar os códigos repetitivos e forma algorítmica, fizemos usos de duas ferramentas distintas: Cog\footnote{Cog é um aplicativo que executa programas Python contidos em comentários do código fonte e substitui sua saída ao final da execução. O programa está disponível publicamente \mbox{em \url{http://nedbatchelder.com/code/cog/}}} e um script personalizado de geração de executores de instruções.
 
 Mais detalhes da geração de código podem ser extraídas do código fonte do projeto disponível no GitHub.
 
 
 \section{Especificação final}
-\todo{Escrever seção de especificação final}
+A especificação final para o nosso projeto consiste em um processador de arquitetura do tipo Von Neumann\footnote{A arquitetura Von Neumann consiste em uma única memória compartilhada tanto para dados como para programas.} de 16 bits com instruções básicas do tipo:
+
+\begin{itemize}
+	\item Operações de memória: Carregar dado da memória, armazenar dado na memória
+	\item Operações aritméticas: adição, subtração, multiplicação e divisão
+	\item Operações de IO: Write port e Read port
+	\item Operações bit-a-bit: AND, NAND, OR, NOR, XOR e NOT
+\end{itemize}
+
+\todo{Escrever sobre os registradores}
 
 \chapter{Testes}
 \todo{Escrever capítulo de testes}
