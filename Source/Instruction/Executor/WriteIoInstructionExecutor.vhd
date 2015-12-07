@@ -18,7 +18,7 @@ use BananaCore.RegisterPackage.all;
 -- The WriteIoInstructionExecutor entity
 entity WriteIoInstructionExecutor is
 	port(
-		-- the processor main clock 
+		-- the processor main clock
  		clock: in BananaCore.Core.Clock;
 
 		-- enables the instruction
@@ -36,41 +36,47 @@ entity WriteIoInstructionExecutor is
 		------------------------------------------
 		-- MEMORY BUS
 		------------------------------------------
-		-- the address to read/write memory from/to 
+		-- the address to read/write memory from/to
  		memory_address: out MemoryAddress;
- 		 
+
  		-- the memory being read to
 		memory_data_read: in MemoryData;
 
  		-- the memory being written to
 		memory_data_write: out MemoryData;
 
- 		-- the operation to perform on the memory 
+ 		-- the operation to perform on the memory
  		memory_operation: out MemoryOperation;
-				
+
 		-- a flag indicating if a memory operation should be performed
- 		memory_enable: out std_logic;
-		
+ 		memory_enable: out std_logic := '0';
+
 		-- a flag indicating if a memory operation has completed
  		memory_ready: in std_logic;
-		
+
 		------------------------------------------
 		-- REGISTER BUS
 		------------------------------------------
 		-- the processor register address bus
 		register_address: out RegisterAddress;
-		
+
 		-- the processor register data bus
 		register_data_read: in RegisterData;
 
 		-- the processor register data bus
 		register_data_write: out RegisterData;
-		
+
 		-- the processor register operation signal
 		register_operation: out RegisterOperation;
-		
+
 		-- the processor register enable signal
-		register_enable: out std_logic;
+		register_enable: out std_logic := '0';
+
+		-- a flag indicating if a register operation has completed
+		register_ready: in std_logic;
+
+
+		
 
 		------------------------------------------
 		-- IO ports
@@ -90,7 +96,6 @@ architecture WriteIoInstructionExecutorImpl of WriteIoInstructionExecutor is
 		store_arg0,
 
 		execute,
-		store_result,
 		complete
 	);
 	signal state: state_type := fetch_arg0;
@@ -119,13 +124,10 @@ begin
 
 					when execute =>
 						port1 <= arg0(7 downto 0);
-						state <= store_result;
-
-					when store_result =>
-						instruction_ready <= '1';
 						state <= complete;
-						
+
 					when complete =>
+						instruction_ready <= '1';
 						state <= complete;
 				end case;
 

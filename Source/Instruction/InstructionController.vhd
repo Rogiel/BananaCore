@@ -9,6 +9,7 @@
 library ieee;
 use ieee.numeric_std.all;
 use ieee.std_logic_1164.all;
+use ieee.NUMERIC_STD.all;
 
 library BananaCore;
 
@@ -65,7 +66,7 @@ entity InstructionController is
 
  		-- the memory being read to
 		memory_data_read: in MemoryData;
-		
+
  		-- the memory being written to
 		memory_data_write: out MemoryData;
 
@@ -74,7 +75,7 @@ entity InstructionController is
 
 		-- a flag indicating if a memory operation should be performed
  		memory_enable: out std_logic;
-		
+
 		-- a flag indicating if a memory operation has completed
  		memory_ready: in std_logic;
 
@@ -87,7 +88,7 @@ entity InstructionController is
 
 		-- the processor memory data bus
 		register_data_read: in RegisterData;
-		
+
 		-- the processor memory data bus
 		register_data_write: out RegisterData;
 
@@ -96,7 +97,10 @@ entity InstructionController is
 
 		-- the processor memory operation signal
 		register_enable: out std_logic;
-		
+
+		-- a flag indicating if a register operation has completed
+		register_ready: in std_logic;
+
 		------------------------------------------
 		-- IO PORTS
 		------------------------------------------
@@ -113,7 +117,7 @@ architecture InstructionControllerImpl of InstructionController is
 	signal instruction_data: std_logic_vector(0 to 31);
 	signal current_instruction: DecodedInstruction;
 
-	signal program_counter: integer := 0;
+	signal program_counter: MemoryAddress := integer_to_memory_address(0);
 
 	type state_type is (
 		read_memory0,
@@ -145,14 +149,14 @@ architecture InstructionControllerImpl of InstructionController is
 	signal register_data_local: RegisterData;
 	signal register_operation_local: RegisterOperation;
 	signal register_enable_local: std_logic;
-	
+
 	attribute keep: boolean;
 	attribute keep of instruction_ready: signal is true;
 	attribute keep of instruction_data: signal is true;
 	attribute keep of current_instruction: signal is true;
-	
+
 	attribute keep of state: signal is true;
-	
+
 	-- [[[cog
 	--content = [line.rstrip('\n') for line in open('instructions.txt')]
 	--for line in content:
@@ -408,8 +412,14 @@ architecture InstructionControllerImpl of InstructionController is
 	signal port1_reset: MemoryData;
 
 	-- [[[end]]]
-	
+
 	signal mux_disabled : std_logic := '1';
+
+	signal jump_program_counter : MemoryAddress;
+	signal jump_program_counter_set : std_logic;
+
+	signal jump_if_carry_program_counter : MemoryAddress;
+	signal jump_if_carry_program_counter_set : std_logic;
 
 begin
 	-- IMPLEMENTATION NOTE: here, we could very easily (and handly) implement a pipeline.
@@ -634,7 +644,6 @@ begin
 	-- [[[end]]]
 
 	register_enable <=
-	register_enable_local when mux_disabled = '1' else
 	-- [[[cog
 	--content = [line.rstrip('\n') for line in open('instructions.txt')]
 	--counter=0;
@@ -666,8 +675,9 @@ begin
 	register_enable_jump when instruction_enabler(20) = '1' else
 	register_enable_jumpifcarry when instruction_enabler(21) = '1' else
 	register_enable_halt when instruction_enabler(22) = '1' else
-	register_enable_reset when instruction_enabler(23) = '1';
+	register_enable_reset when instruction_enabler(23) = '1' else
 	-- [[[end]]]
+	'0';
 
 	register_address <=
 	register_address_local when mux_disabled = '1' else
@@ -704,41 +714,8 @@ begin
 	register_address_halt when instruction_enabler(22) = '1' else
 	register_address_reset when instruction_enabler(23) = '1';
 	-- [[[end]]]
-	
-	port1 <=
-	-- [[[cog
-	--content = [line.rstrip('\n') for line in open('instructions.txt')]
-	--counter=0;
-	--for line in content[:-1]:
-	--	cog.outl("\tport1_{0} when instruction_enabler({1}) = '1' else".format(line.lower(), counter));
-	--	counter = counter + 1
-	--cog.outl("\tport1_{0} when instruction_enabler({1}) = '1';".format(content[-1].lower(), counter));
-	--]]]
-	port1_load when instruction_enabler(0) = '1' else
-	port1_store when instruction_enabler(1) = '1' else
-	port1_writeio when instruction_enabler(2) = '1' else
-	port1_readio when instruction_enabler(3) = '1' else
-	port1_add when instruction_enabler(4) = '1' else
-	port1_subtract when instruction_enabler(5) = '1' else
-	port1_multiply when instruction_enabler(6) = '1' else
-	port1_divide when instruction_enabler(7) = '1' else
-	port1_bitwiseand when instruction_enabler(8) = '1' else
-	port1_bitwiseor when instruction_enabler(9) = '1' else
-	port1_bitwisenand when instruction_enabler(10) = '1' else
-	port1_bitwisenor when instruction_enabler(11) = '1' else
-	port1_bitwisexor when instruction_enabler(12) = '1' else
-	port1_bitwisenot when instruction_enabler(13) = '1' else
-	port1_greaterthan when instruction_enabler(14) = '1' else
-	port1_greaterorequalthan when instruction_enabler(15) = '1' else
-	port1_lessthan when instruction_enabler(16) = '1' else
-	port1_lessorequalthan when instruction_enabler(17) = '1' else
-	port1_equal when instruction_enabler(18) = '1' else
-	port1_notequal when instruction_enabler(19) = '1' else
-	port1_jump when instruction_enabler(20) = '1' else
-	port1_jumpifcarry when instruction_enabler(21) = '1' else
-	port1_halt when instruction_enabler(22) = '1' else
-	port1_reset when instruction_enabler(23) = '1';
-	-- [[[end]]]
+
+	port1 <= port1_writeio;
 
 	-- [[--[cog
 	--content = [line.rstrip('\n') for line in open('instructions.txt')]
@@ -790,6 +767,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_load,
 		register_enable => register_enable_load,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_load
 	);
@@ -812,6 +790,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_store,
 		register_enable => register_enable_store,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_store
 	);
@@ -833,6 +812,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_writeio,
 		register_enable => register_enable_writeio,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_writeio
 	);
@@ -854,6 +834,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_readio,
 		register_enable => register_enable_readio,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_readio
 	);
@@ -875,6 +856,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_add,
 		register_enable => register_enable_add,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_add
 	);
@@ -896,6 +878,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_subtract,
 		register_enable => register_enable_subtract,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_subtract
 	);
@@ -917,6 +900,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_multiply,
 		register_enable => register_enable_multiply,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_multiply
 	);
@@ -938,6 +922,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_divide,
 		register_enable => register_enable_divide,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_divide
 	);
@@ -959,6 +944,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_bitwiseand,
 		register_enable => register_enable_bitwiseand,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_bitwiseand
 	);
@@ -980,6 +966,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_bitwiseor,
 		register_enable => register_enable_bitwiseor,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_bitwiseor
 	);
@@ -1001,6 +988,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_bitwisenand,
 		register_enable => register_enable_bitwisenand,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_bitwisenand
 	);
@@ -1022,6 +1010,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_bitwisenor,
 		register_enable => register_enable_bitwisenor,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_bitwisenor
 	);
@@ -1043,6 +1032,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_bitwisexor,
 		register_enable => register_enable_bitwisexor,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_bitwisexor
 	);
@@ -1064,6 +1054,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_bitwisenot,
 		register_enable => register_enable_bitwisenot,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_bitwisenot
 	);
@@ -1085,6 +1076,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_greaterthan,
 		register_enable => register_enable_greaterthan,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_greaterthan
 	);
@@ -1106,6 +1098,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_greaterorequalthan,
 		register_enable => register_enable_greaterorequalthan,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_greaterorequalthan
 	);
@@ -1127,6 +1120,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_lessthan,
 		register_enable => register_enable_lessthan,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_lessthan
 	);
@@ -1148,6 +1142,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_lessorequalthan,
 		register_enable => register_enable_lessorequalthan,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_lessorequalthan
 	);
@@ -1169,6 +1164,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_equal,
 		register_enable => register_enable_equal,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_equal
 	);
@@ -1190,6 +1186,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_notequal,
 		register_enable => register_enable_notequal,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_notequal
 	);
@@ -1197,8 +1194,7 @@ begin
 	jump_instruction_executor: JumpInstructionExecutor port map(
 		clock => clock,
 		enable => instruction_enabler(20),
-		arg0_address => current_instruction.reg0,
-		arg1_address => current_instruction.reg1,
+		arg0_address => current_instruction.address,
 		instruction_ready => instruction_ready(20),
 		memory_address => memory_address_jump,
 		memory_data_read => memory_data_read,
@@ -1211,6 +1207,9 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_jump,
 		register_enable => register_enable_jump,
+		program_counter => jump_program_counter,
+		program_counter_set => jump_program_counter_set,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_jump
 	);
@@ -1218,8 +1217,7 @@ begin
 	jumpifcarry_instruction_executor: JumpIfCarryInstructionExecutor port map(
 		clock => clock,
 		enable => instruction_enabler(21),
-		arg0_address => current_instruction.reg0,
-		arg1_address => current_instruction.reg1,
+		arg0_address => current_instruction.address,
 		instruction_ready => instruction_ready(21),
 		memory_address => memory_address_jumpifcarry,
 		memory_data_read => memory_data_read,
@@ -1232,6 +1230,11 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_jumpifcarry,
 		register_enable => register_enable_jumpifcarry,
+		register_ready => register_ready,
+
+		program_counter => jump_if_carry_program_counter,
+		program_counter_set => jump_if_carry_program_counter_set,
+
 		port0 => port0,
 		port1 => port1_jumpifcarry
 	);
@@ -1253,6 +1256,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_halt,
 		register_enable => register_enable_halt,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_halt
 	);
@@ -1274,6 +1278,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_reset,
 		register_enable => register_enable_reset,
+		register_ready => register_ready,
 		port0 => port0,
 		port1 => port1_reset
 	);
@@ -1284,13 +1289,15 @@ begin
 		if clock'event and clock = '1' then
 			case state is
 				when read_memory0 =>
-					memory_address_local <= integer_to_memory_address(program_counter);
+					mux_disabled <= '1';
+					memory_address_local <= program_counter;
 					memory_operation_local <= MEMORY_OP_READ;
 					memory_enable_local <= '1';
-					
+
 					state <= wait_memory0;
-					
+
 				when wait_memory0 =>
+					mux_disabled <= '1';
 					if memory_ready = '1' then
 						instruction_data(0 to 7) <= memory_data_read;
 						memory_enable_local <= '0';
@@ -1300,13 +1307,15 @@ begin
 					end if;
 
 				when read_memory1 =>
-					memory_address_local <= integer_to_memory_address(program_counter + 1);
+					mux_disabled <= '1';
+					memory_address_local <= program_counter + 1;
 					memory_operation_local <= MEMORY_OP_READ;
 					memory_enable_local <= '1';
-					
+
 					state <= wait_memory1;
-					
+
 				when wait_memory1 =>
+					mux_disabled <= '1';
 					if memory_ready = '1' then
 						instruction_data(8 to 15) <= memory_data_read;
 						memory_enable_local <= '0';
@@ -1316,12 +1325,14 @@ begin
 					end if;
 
 				when read_memory2 =>
-					memory_address_local <= integer_to_memory_address(program_counter + 2);
+					mux_disabled <= '1';
+					memory_address_local <= program_counter + 2;
 					memory_operation_local <= MEMORY_OP_READ;
 					memory_enable_local <= '1';
 					state <= wait_memory2;
-					
+
 				when wait_memory2 =>
+					mux_disabled <= '1';
 					if memory_ready = '1' then
 						instruction_data(16 to 23) <= memory_data_read;
 						memory_enable_local <= '0';
@@ -1329,14 +1340,16 @@ begin
 					else
 						state <= wait_memory2;
 					end if;
-					
+
 				when read_memory3 =>
-					memory_address_local <= integer_to_memory_address(program_counter + 3);
+					mux_disabled <= '1';
+					memory_address_local <= program_counter + 3;
 					memory_operation_local <= MEMORY_OP_READ;
 					memory_enable_local <= '1';
 					state <= wait_memory3;
-					
+
 				when wait_memory3 =>
+					mux_disabled <= '1';
 					if memory_ready = '1' then
 						instruction_data(24 to 31) <= memory_data_read;
 						memory_enable_local <= '0';
@@ -1346,16 +1359,24 @@ begin
 					end if;
 
 				when decode_instruction =>
+					mux_disabled <= '0';
 					memory_enable_local <= '0';
 
 					case instruction_data(0 to 7) is
 						when "00000000" =>
 							current_instruction.opcode <= LOAD;
-							current_instruction.size <= 4;
 
 							current_instruction.reg0 <= unsigned(instruction_data(8 to 11));
 							current_instruction.reg1 <= unsigned(instruction_data(12 to 15));
 							current_instruction.address <= unsigned(instruction_data(16 to 31));
+
+							if unsigned(instruction_data(8 to 11)) = 0 then
+								current_instruction.size <= 3;
+							elsif unsigned(instruction_data(8 to 11)) = 1 then
+								current_instruction.size <= 4;
+							elsif unsigned(instruction_data(8 to 11)) = 2 then
+								current_instruction.size <= 4;
+							end if;
 
 						when "00000001" =>
 							current_instruction.opcode <= STORE;
@@ -1378,7 +1399,7 @@ begin
 
 							current_instruction.reg0 <= (unsigned(instruction_data(8 to 11)));
 							current_instruction.reg1 <= (unsigned(instruction_data(12 to 15)));
-							
+
 						when "00010000" =>
 							current_instruction.opcode <= ADD;
 							current_instruction.size <= 2;
@@ -1490,12 +1511,14 @@ begin
 						when "00100010" =>
 							current_instruction.opcode <= JUMP_IF_CARRY;
 							current_instruction.size <= 3;
+							
+							current_instruction.address <= bits_to_memory_address(instruction_data(8 to 23));
 
 						when others =>
 							current_instruction.opcode <= HALT;
 							current_instruction.size <= 1;
 					end case;
-					
+
 					state <= execute;
 				when execute =>
 					mux_disabled <= '0';
@@ -1544,7 +1567,19 @@ begin
 					state <= wait_execute;
 
 				when wait_execute =>
-				
+--					program_counter <=
+--						jump_program_counter when jump_program_counter_set = '1' else
+--						jump_if_carry_program_counter when jump_if_carry_program_counter_set = '1' else
+--						program_counter;
+
+					if jump_program_counter_set = '1' then
+						program_counter <= jump_program_counter;
+					elsif  jump_if_carry_program_counter_set = '1' then
+						program_counter <= jump_if_carry_program_counter;
+					else
+						program_counter <= program_counter;
+					end if;
+
 					case current_instruction.opcode is
 						-- [[[cog
 						--import re
@@ -1562,7 +1597,7 @@ begin
 						--	cog.outl("\tend if;")
 						--	counter = counter + 1
 						--]]]
-						when LOAD => 
+						when LOAD =>
 							if instruction_ready(0) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1570,7 +1605,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when STORE => 
+						when STORE =>
 							if instruction_ready(1) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1578,7 +1613,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when WRITE_IO => 
+						when WRITE_IO =>
 							if instruction_ready(2) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1586,7 +1621,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when READ_IO => 
+						when READ_IO =>
 							if instruction_ready(3) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1594,7 +1629,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when ADD => 
+						when ADD =>
 							if instruction_ready(4) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1602,7 +1637,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when SUBTRACT => 
+						when SUBTRACT =>
 							if instruction_ready(5) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1610,7 +1645,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when MULTIPLY => 
+						when MULTIPLY =>
 							if instruction_ready(6) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1618,7 +1653,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when DIVIDE => 
+						when DIVIDE =>
 							if instruction_ready(7) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1626,7 +1661,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when BITWISE_AND => 
+						when BITWISE_AND =>
 							if instruction_ready(8) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1634,7 +1669,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when BITWISE_OR => 
+						when BITWISE_OR =>
 							if instruction_ready(9) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1642,7 +1677,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when BITWISE_NAND => 
+						when BITWISE_NAND =>
 							if instruction_ready(10) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1650,7 +1685,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when BITWISE_NOR => 
+						when BITWISE_NOR =>
 							if instruction_ready(11) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1658,7 +1693,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when BITWISE_XOR => 
+						when BITWISE_XOR =>
 							if instruction_ready(12) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1666,7 +1701,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when BITWISE_NOT => 
+						when BITWISE_NOT =>
 							if instruction_ready(13) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1674,7 +1709,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when GREATER_THAN => 
+						when GREATER_THAN =>
 							if instruction_ready(14) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1682,7 +1717,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when GREATER_OR_EQUAL_THAN => 
+						when GREATER_OR_EQUAL_THAN =>
 							if instruction_ready(15) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1690,7 +1725,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when LESS_THAN => 
+						when LESS_THAN =>
 							if instruction_ready(16) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1698,7 +1733,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when LESS_OR_EQUAL_THAN => 
+						when LESS_OR_EQUAL_THAN =>
 							if instruction_ready(17) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1706,7 +1741,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when EQUAL => 
+						when EQUAL =>
 							if instruction_ready(18) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1714,7 +1749,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when NOT_EQUAL => 
+						when NOT_EQUAL =>
 							if instruction_ready(19) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1722,7 +1757,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when JUMP => 
+						when JUMP =>
 							if instruction_ready(20) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1730,7 +1765,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when JUMP_IF_CARRY => 
+						when JUMP_IF_CARRY =>
 							if instruction_ready(21) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1738,7 +1773,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when HALT => 
+						when HALT =>
 							if instruction_ready(22) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1746,7 +1781,7 @@ begin
 							else
 								state <= wait_execute;
 							end if;
-						when RESET => 
+						when RESET =>
 							if instruction_ready(23) = '1' then
 								instruction_enabler <= (others => '0');
 								mux_disabled <= '1';
@@ -1756,7 +1791,7 @@ begin
 							end if;
 						-- [[[end]]]
 					end case;
-					
+
 			end case;
 		end if;
 	end process;

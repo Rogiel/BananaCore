@@ -99,6 +99,14 @@ architecture MemoryBankImpl of MemoryBank is
 		"00000000",
 		"00010000",
 		
+		-- WRITE IO
+		"00000010",
+		"00100000",
+				
+		-- WRITE IO
+		"00000010",
+		"00100000",
+		
 		-- HALT
 		"11111110",
 		

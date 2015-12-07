@@ -18,7 +18,7 @@ use BananaCore.RegisterPackage.all;
 -- The ResetInstructionExecutor entity
 entity ResetInstructionExecutor is
 	port(
-		-- the processor main clock 
+		-- the processor main clock
  		clock: in BananaCore.Core.Clock;
 
 		-- enables the instruction
@@ -36,41 +36,44 @@ entity ResetInstructionExecutor is
 		------------------------------------------
 		-- MEMORY BUS
 		------------------------------------------
-		-- the address to read/write memory from/to 
+		-- the address to read/write memory from/to
  		memory_address: out MemoryAddress := (others => '0');
- 		 
+
  		-- the memory being read to
 		memory_data_read: in MemoryData;
 
  		-- the memory being written to
 		memory_data_write: out MemoryData := (others => '0');
 
- 		-- the operation to perform on the memory 
+ 		-- the operation to perform on the memory
  		memory_operation: out MemoryOperation := MEMORY_OP_DISABLED;
-		
+
 		-- a flag indicating if a memory operation should be performed
- 		memory_enable: out std_logic;
+ 		memory_enable: out std_logic := '0';
 
 		-- a flag indicating if a memory operation has completed
  		memory_ready: in std_logic;
-		
+
 		------------------------------------------
 		-- REGISTER BUS
 		------------------------------------------
 		-- the processor register address bus
 		register_address: out RegisterAddress := (others => '0');
-		
+
 		-- the processor register data bus
 		register_data_read: in RegisterData;
 
 		-- the processor register data bus
 		register_data_write: out RegisterData := (others => '0');
-		
+
 		-- the processor register operation signal
 		register_operation: out RegisterOperation := OP_REG_DISABLED;
-		
+
 		-- the processor register enable signal
 		register_enable: out std_logic := '0';
+
+		-- a flag indicating if a register operation has completed
+		register_ready: in std_logic;
 
 		------------------------------------------
 		-- IO ports
