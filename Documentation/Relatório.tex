@@ -109,10 +109,28 @@ A especificação final para o nosso projeto consiste em um processador de arqui
 \chapter{Testes}
 \todo{Escrever capítulo de testes}
 
+\chapter{Melhoramentos futuros}
+\section*{Tempos de espera redundantes}
+Na implementação atual, o processador gasta muitos ciclos de clock esperando por sinais internos. Muitas destas esperas podem ser removidas ou simplificadas.
+
+\section*{Aglutinação de leituras consecutivas}
+Também, é possível aglutinar operações de forma simultânea. Por exemplo, é possível reduzir um ciclo de clock a cada leitura de 2 bytes consecutivos da memória ao iniciar a leitura do próximo imediatamente após a finalização da leitura anterior.
+
+\section*{Acesso a memória em palavras maiores}
+Para melhorar a performance é possível aumentar o tamanho da palavra retornada pelo controlador de memória. Atualmente o controlador retorna palavras com 8 bits. Este limite pode ser aumentado (ou configurável) de forma a permitir que seja possível ler mais bytes em apenas uma solicitação.
+
+\section*{Ineficiência do divisor}
+Após a análise de "slow-model" to TimeQuest, percebe-se claramente que o caminho crítico do processador está no divisor. Ele é responsável por um circuito síncrono, isto faz com que o clock do processador inteiro seja delimitado pelo clock deste caminho crítico. Uma possível solução seria implementar pipeline no cálculo da divisão para segmentar este caminho crítico em múltiplos caminhos menores.
+
+\section*{Controlador de clock interno}
+Se possível na placa de desenvolvimento, a criação de um controlador de clock interno permitiria que o clock fosse ajustado para velocidade mínima necessária no momento, bem como permitiria a redução (ou total desligamento) do clock do processador para economia de energia ou dissipação de calor.
+
+\section*{Controlador de interrupções}
+Uma futura melhoria interessante é a adição de interrupções por timers e externas.
+
 \chapter{Conclusão}
 \todo{Escrever capítulo de conclusão}
 
 O processador é, dos componentes de um computador ou sistema digital, o componente mais caro e complexo. Trata-se de uma poderosa máquina de calcular.Tendo em vista sua função e complexidade, conclui-se que como projeto de conclusão de disciplina um processador é um elemento extremamente adequado, abordando grande parte dos conceitos estudados durante o semestre.
-
 
 \end{document}
