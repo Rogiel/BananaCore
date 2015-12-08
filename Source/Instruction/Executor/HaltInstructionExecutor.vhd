@@ -86,9 +86,7 @@ architecture HaltInstructionExecutorImpl of HaltInstructionExecutor is
 		fetch_arg1,
 		store_arg1,
 
-		execute,
-		store_result,
-		complete
+		execute
 	);
 	signal state: state_type := fetch_arg0;
 
@@ -127,20 +125,8 @@ begin
 						register_enable <= '0';
 
 					when execute =>
-						-- TODO implement instruction here
-						state <= store_result;
-
-					when store_result =>
-						register_address <= AccumulatorRegister;
-						register_operation <= OP_REG_SET;
-						register_data_write <= result;
-						register_enable <= '1';
-
-						instruction_ready <= '1';
-						state <= complete;
-
-					when complete =>
-						state <= complete;
+						state <= execute;
+						
 				end case;
 
 			else
