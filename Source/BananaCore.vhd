@@ -32,7 +32,6 @@ library BananaCore;
 use BananaCore.InstructionController;
 use BananaCore.Instruction.DecodedInstruction;
 
-use BananaCore.ClockController;
 use BananaCore.Core.all;
 
 use BananaCore.Memory.all;
@@ -42,9 +41,6 @@ use BananaCore.RegisterPackage.all;
 use BananaCore.RegisterController;
 
 use BananaCore.Numeric.Word;
-
-use BananaCore.ULA;
-
 use BananaCore.RegisterEntity;
 
 -- Implements the processor entry point
