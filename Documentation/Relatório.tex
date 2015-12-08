@@ -21,6 +21,8 @@
 \chapter{Introdução}
 \todo{Escrever capítulo de introdução}
 
+O presente projeto versa sobre o processador BananaCore, desenvolvido como trabalho final da disciplina ENG04461 - Sistemas Digitais. Faz-se importante ressaltar que nosso processador foi desenvolvido com fins didáticos, não tentando priorizar desempenho ótimo.
+
 \chapter{Especificação}
 
 A especificação inicial para o nosso projeto consiste em um processador de arquitetura do tipo Von Neumann\footnote{A arquitetura Von Neumann consiste em uma única memória compartilhada tanto para dados como para programas.} de 16 bits com instruções básicas do tipo:
@@ -32,7 +34,7 @@ A especificação inicial para o nosso projeto consiste em um processador de arq
 	\item Operações bit-a-bit: AND, NAND, OR, NOR, XOR e NOT
 \end{itemize}
 
-Como o objetivo do trabalho é desenvolver apenas um processador -- não estamos interessados em como armazenar o programa no FPGA -- escolhemos por gravar o programa de forma fixa; isto é, o programa é armazenado direto na memória RAM como um valor inicial.
+Como o objetivo do trabalho é desenvolver apenas um processador (não estamos interessados em como armazenar o programa no FPGA) escolhemos por gravar o programa de forma fixa; isto é, o programa é armazenado direto na memória RAM como um valor inicial.
 
 Sabendo da limitação desta implementação, o design deve permitir que seja fácil substituir esta implementação inicial por outra mais funcional e completa.
 
@@ -40,7 +42,7 @@ Sabendo da limitação desta implementação, o design deve permitir que seja f�
 
 \section{Controlador de Memória}
 \label{sec:MemoryController}
-O controlador de memória é a unidade que faz o intermédio ao acesso a memória do processador; nele, a operação de escrita é validada e então enviada para um respectivo memory bank (ver seção \ref{sec:MemoryBank}).
+O controlador de memória é a unidade que faz o intermédio ao acesso a memória do processador.Nele, a operação de escrita é validada e então enviada para um respectivo memory bank (ver seção \ref{sec:MemoryBank}).
 
 O controlador é operado utilizando $7$ sinais:
 
@@ -56,7 +58,7 @@ O controlador é operado utilizando $7$ sinais:
 Para ler um byte da memória RAM, primeiramente seleciona-se o endereço desejado e atribui-se este valor ao barramento de endereços. Em seguida, o bit de operação é definido em modo leitura e aguarda-se um número arbitrário de clocks até que o sinal de pronto transicione para nível alto. No instante em que este sinal transiciona, o dado já está disponível na porta de leitura.
 
 \subsection{Escrita na memória RAM}
-Para escrever um byte na memória RAM, primeiramente seleciona-se o endereço desejado e atribui-se este valor ao barramento de endereços. Em seguida, no barramento de escrita de dados, o valor do byte é atribuido e o bit de operaçao é definido para uma operaçao do tipo \emph{WRITE}. Devido ao fato da memória RAM possuir um clock diferenciado do processador central, é necessário aguardar um intervalo arbitrário de ciclos de clock até que o sinal de pronto seja colocado em alto. Neste momento, já é possível iniciar a escrita do próximo byte da mesma maneira.
+Para escrever um byte na memória RAM, primeiramente seleciona-se o endereço desejado e atribui-se este valor ao barramento de endereços. Em seguida, no barramento de escrita de dados, o valor do byte é atribuido e o bit de operaçao é definido para uma operação do tipo \emph{WRITE}. Devido ao fato da memória RAM possuir um clock diferenciado do processador central, é necessário aguardar um intervalo arbitrário de ciclos de clock até que o sinal de pronto seja colocado em alto. Neste momento, já é possível iniciar a escrita do próximo byte da mesma maneira.
 
 \subsection{Memory Bank}
 \label{sec:MemoryBank}
@@ -81,7 +83,7 @@ Cada instrução foi dividida em uma entidade chamada de \emph{executor}. Esta e
 
 Inicialmente, pretendíamos implementar o acesso global a memória por via de um barramento delimitado por \emph{buffers tri-state}, contudo, esta implementação se mostrou muito complexa, pois ao incrementar as implementações de instruções do processador o barramento entrava em um estado inválido pois mais de dois sinais tentavam ser escritos no barramento em simultâneo. Acreditamos que estes problemas são devidos a falhas de design da arquitetura e que poderiam ser resolvidas escolhendo uma forma alternativa de implementação das instruções.
 
-A solução desde problema, embora não seja ideal, foi simples: um grande MUX foi implementado de forma a fazer o "controle" de acesso ao barramento principal. Esta solução tem um grave problema: a necessidade de escrever código cresce muito em função da quantidade de instruções implementadas. Para um processador simples como o BananaCore isto pode não ser um problema muito relevante; mas para implementações maiores isto pode ganhar uma faceta muito mais adversa. Como forma de solucionar, parcialmente, este empecilho, fizemos uso de artefatos de geração de código para gerar os muxes e demais condições do decodificador de instruções (ver seção \ref{sec:CodeGeneration}).
+A solução desde problema, embora não seja ideal, foi simples: um grande MUX foi implementado de forma a fazer o "controle" de acesso ao barramento principal. Esta solução tem um grave problema: a necessidade de escrever código cresce muito em função da quantidade de instruções implementadas. Para um processador simples como o BananaCore isto pode não ser um problema muito relevante. Para implementações maiores, porém, isto pode ganhar uma faceta muito mais adversa. Como forma de solucionar, parcialmente, este empecilho, fizemos uso de artefatos de geração de código para gerar os muxes e demais condições do decodificador de instruções (ver seção \ref{sec:CodeGeneration}).
 
 \todo{Detalhar a implementação atual}
 
@@ -109,6 +111,8 @@ A especificação final para o nosso projeto consiste em um processador de arqui
 
 \chapter{Conclusão}
 \todo{Escrever capítulo de conclusão}
+
+O processador é, dos componentes de um computador ou sistema digital, o componente mais caro e complexo. Trata-se de uma poderosa máquina de calcular.Tendo em vista sua função e complexidade, conclui-se que como projeto de conclusão de disciplina um processador é um elemento extremamente adequado, abordando grande parte dos conceitos estudados durante o semestre.
 
 
 \end{document}
