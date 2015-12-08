@@ -17,6 +17,9 @@ package Core is
 
 	-- Represents the clock type
 	subtype Clock is bit;
+	
+	-- Represents a data
+	subtype IOPortData is std_logic_vector(DataWidth-1 downto 0);
 end package Core;
 
 
@@ -50,10 +53,10 @@ entity BananaCore is
 		clock: in Clock;
 
 		-- io port: port0
-		port0: in MemoryData;
+		port0: in IOPortData;
 
 		-- io port: port1
-		port1: out MemoryData
+		port1: out IOPortData
 	);
 end BananaCore;
 

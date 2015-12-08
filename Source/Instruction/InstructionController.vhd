@@ -105,10 +105,10 @@ entity InstructionController is
 		-- IO PORTS
 		------------------------------------------
 		-- io port: port0
-		port0: in MemoryData;
+		port0: in IOPortData;
 
 		-- io port: port1
-		port1: out MemoryData
+		port1: out IOPortData
 	);
 
 end InstructionController;
@@ -168,7 +168,6 @@ architecture InstructionControllerImpl of InstructionController is
 	--	cog.outl("signal register_data_write_{0}: RegisterData;".format(line.lower()))
 	--	cog.outl("signal register_operation_{0}: RegisterOperation := OP_REG_DISABLED;".format(line.lower()))
 	--	cog.outl("signal register_enable_{0}: std_logic;".format(line.lower()))
-	--	cog.outl("signal port1_{0}: MemoryData;".format(line.lower()))
 	-- 	cog.outl();
 	--]]]
 	signal memory_address_load: MemoryAddress;
@@ -715,8 +714,6 @@ begin
 	register_address_reset when instruction_enabler(23) = '1';
 	-- [[[end]]]
 
-	port1 <= port1_writeio;
-
 	-- [[--[cog
 	--content = [line.rstrip('\n') for line in open('instructions.txt')]
 	--counter=0;
@@ -767,9 +764,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_load,
 		register_enable => register_enable_load,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_load
+		register_ready => register_ready
 	);
 
 	store_instruction_executor: StoreInstructionExecutor port map(
@@ -790,9 +785,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_store,
 		register_enable => register_enable_store,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_store
+		register_ready => register_ready
 	);
 
 	writeio_instruction_executor: WriteIoInstructionExecutor port map(
@@ -813,8 +806,7 @@ begin
 		register_data_write => register_data_write_writeio,
 		register_enable => register_enable_writeio,
 		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_writeio
+		port1 => port1
 	);
 
 	readio_instruction_executor: ReadIoInstructionExecutor port map(
@@ -835,8 +827,7 @@ begin
 		register_data_write => register_data_write_readio,
 		register_enable => register_enable_readio,
 		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_readio
+		port0 => port0
 	);
 
 	add_instruction_executor: AddInstructionExecutor port map(
@@ -856,9 +847,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_add,
 		register_enable => register_enable_add,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_add
+		register_ready => register_ready
 	);
 
 	subtract_instruction_executor: SubtractInstructionExecutor port map(
@@ -878,9 +867,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_subtract,
 		register_enable => register_enable_subtract,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_subtract
+		register_ready => register_ready
 	);
 
 	multiply_instruction_executor: MultiplyInstructionExecutor port map(
@@ -900,9 +887,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_multiply,
 		register_enable => register_enable_multiply,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_multiply
+		register_ready => register_ready
 	);
 
 	divide_instruction_executor: DivideInstructionExecutor port map(
@@ -922,9 +907,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_divide,
 		register_enable => register_enable_divide,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_divide
+		register_ready => register_ready
 	);
 
 	bitwiseand_instruction_executor: BitwiseAndInstructionExecutor port map(
@@ -944,9 +927,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_bitwiseand,
 		register_enable => register_enable_bitwiseand,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_bitwiseand
+		register_ready => register_ready
 	);
 
 	bitwiseor_instruction_executor: BitwiseOrInstructionExecutor port map(
@@ -966,9 +947,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_bitwiseor,
 		register_enable => register_enable_bitwiseor,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_bitwiseor
+		register_ready => register_ready
 	);
 
 	bitwisenand_instruction_executor: BitwiseNandInstructionExecutor port map(
@@ -988,9 +967,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_bitwisenand,
 		register_enable => register_enable_bitwisenand,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_bitwisenand
+		register_ready => register_ready
 	);
 
 	bitwisenor_instruction_executor: BitwiseNorInstructionExecutor port map(
@@ -1010,9 +987,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_bitwisenor,
 		register_enable => register_enable_bitwisenor,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_bitwisenor
+		register_ready => register_ready
 	);
 
 	bitwisexor_instruction_executor: BitwiseXorInstructionExecutor port map(
@@ -1032,9 +1007,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_bitwisexor,
 		register_enable => register_enable_bitwisexor,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_bitwisexor
+		register_ready => register_ready
 	);
 
 	bitwisenot_instruction_executor: BitwiseNotInstructionExecutor port map(
@@ -1054,9 +1027,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_bitwisenot,
 		register_enable => register_enable_bitwisenot,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_bitwisenot
+		register_ready => register_ready
 	);
 
 	greaterthan_instruction_executor: GreaterThanInstructionExecutor port map(
@@ -1076,9 +1047,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_greaterthan,
 		register_enable => register_enable_greaterthan,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_greaterthan
+		register_ready => register_ready
 	);
 
 	greaterorequalthan_instruction_executor: GreaterOrEqualThanInstructionExecutor port map(
@@ -1098,9 +1067,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_greaterorequalthan,
 		register_enable => register_enable_greaterorequalthan,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_greaterorequalthan
+		register_ready => register_ready
 	);
 
 	lessthan_instruction_executor: LessThanInstructionExecutor port map(
@@ -1120,9 +1087,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_lessthan,
 		register_enable => register_enable_lessthan,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_lessthan
+		register_ready => register_ready
 	);
 
 	lessorequalthan_instruction_executor: LessOrEqualThanInstructionExecutor port map(
@@ -1142,9 +1107,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_lessorequalthan,
 		register_enable => register_enable_lessorequalthan,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_lessorequalthan
+		register_ready => register_ready
 	);
 
 	equal_instruction_executor: EqualInstructionExecutor port map(
@@ -1164,9 +1127,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_equal,
 		register_enable => register_enable_equal,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_equal
+		register_ready => register_ready
 	);
 
 	notequal_instruction_executor: NotEqualInstructionExecutor port map(
@@ -1186,9 +1147,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_notequal,
 		register_enable => register_enable_notequal,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_notequal
+		register_ready => register_ready
 	);
 
 	jump_instruction_executor: JumpInstructionExecutor port map(
@@ -1209,9 +1168,7 @@ begin
 		register_enable => register_enable_jump,
 		program_counter => jump_program_counter,
 		program_counter_set => jump_program_counter_set,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_jump
+		register_ready => register_ready
 	);
 
 	jumpifcarry_instruction_executor: JumpIfCarryInstructionExecutor port map(
@@ -1233,10 +1190,7 @@ begin
 		register_ready => register_ready,
 
 		program_counter => jump_if_carry_program_counter,
-		program_counter_set => jump_if_carry_program_counter_set,
-
-		port0 => port0,
-		port1 => port1_jumpifcarry
+		program_counter_set => jump_if_carry_program_counter_set
 	);
 
 	halt_instruction_executor: HaltInstructionExecutor port map(
@@ -1256,9 +1210,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_halt,
 		register_enable => register_enable_halt,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_halt
+		register_ready => register_ready
 	);
 
 	reset_instruction_executor: ResetInstructionExecutor port map(
@@ -1278,9 +1230,7 @@ begin
 		register_data_read => register_data_read,
 		register_data_write => register_data_write_reset,
 		register_enable => register_enable_reset,
-		register_ready => register_ready,
-		port0 => port0,
-		port1 => port1_reset
+		register_ready => register_ready
 	);
 
 	-- [[[--end]]]

@@ -75,17 +75,11 @@ entity WriteIoInstructionExecutor is
 		-- a flag indicating if a register operation has completed
 		register_ready: in std_logic;
 
-
-		
-
 		------------------------------------------
 		-- IO ports
 		------------------------------------------
-		-- io port: port0
-		port0: in MemoryData;
-
 		-- io port: port1
-		port1: out MemoryData
+		port1: out IOPortData
 	);
 end WriteIoInstructionExecutor;
 
@@ -123,7 +117,7 @@ begin
 						state <= execute;
 
 					when execute =>
-						port1 <= arg0(7 downto 0);
+						port1 <= arg0;
 						state <= complete;
 
 					when complete =>

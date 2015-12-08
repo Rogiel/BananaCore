@@ -79,16 +79,7 @@ entity JumpIfCarryInstructionExecutor is
 		program_counter: out MemoryAddress;
 
 		-- the program counter set flag
-		program_counter_set: out std_logic := '0';
-
-		------------------------------------------
-		-- IO ports
-		------------------------------------------
-		-- io port: port0
-		port0: in MemoryData;
-
-		-- io port: port1
-		port1: out MemoryData := (others => '0')
+		program_counter_set: out std_logic := '0'
 	);
 end JumpIfCarryInstructionExecutor;
 

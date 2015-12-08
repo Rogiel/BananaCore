@@ -76,10 +76,10 @@ entity {EntityName} is
 		-- IO ports
 		------------------------------------------
 		-- io port: port0
-		port0: in MemoryData;
+		port0: in IOPortData;
 
 		-- io port: port1
-		port1: out MemoryData := (others => '0')
+		port1: out IOPortData := (others => '0')
 	);
 end {EntityName};
 

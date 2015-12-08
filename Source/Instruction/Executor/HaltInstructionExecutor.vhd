@@ -73,16 +73,7 @@ entity HaltInstructionExecutor is
 		register_enable: out std_logic := '0';
 
 		-- a flag indicating if a register operation has completed
-		register_ready: in std_logic;
-
-		------------------------------------------
-		-- IO ports
-		------------------------------------------
-		-- io port: port0
-		port0: in MemoryData;
-
-		-- io port: port1
-		port1: out MemoryData := (others => '0')
+		register_ready: in std_logic
 	);
 end HaltInstructionExecutor;
 

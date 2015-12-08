@@ -79,10 +79,7 @@ entity ReadIoInstructionExecutor is
 		-- IO ports
 		------------------------------------------
 		-- io port: port0
-		port0: in MemoryData;
-
-		-- io port: port1
-		port1: out MemoryData
+		port0: in IOPortData
 	);
 end ReadIoInstructionExecutor;
 
@@ -106,23 +103,29 @@ begin
 
 				case state is
 					when execute =>
-						result(7 downto 0) <= port0;
+						result <= port0;
 						state <= store_result;
 
 					when store_result =>
-						register_address <= AccumulatorRegister;
+						register_address <= arg0_address;
 						register_operation <= OP_REG_SET;
 						register_data_write <= result;
 						register_enable <= '1';
 
-						instruction_ready <= '1';
 						state <= complete;
 
 					when complete =>
+						if register_ready = '1' then
+							instruction_ready <= '1';
+						end if;
+					
 						state <= complete;
 				end case;
 
 			else
+				register_enable <= '0';
+				register_operation <= OP_REG_GET;
+				
 				instruction_ready <= '0';
 				state <= execute;
 			end if;

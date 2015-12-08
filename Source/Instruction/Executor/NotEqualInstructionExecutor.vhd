@@ -73,16 +73,7 @@ entity NotEqualInstructionExecutor is
 		register_enable: out std_logic := '0';
 
 		-- a flag indicating if a register operation has completed
-		register_ready: in std_logic;
-
-		------------------------------------------
-		-- IO ports
-		------------------------------------------
-		-- io port: port0
-		port0: in MemoryData;
-
-		-- io port: port1
-		port1: out MemoryData := (others => '0')
+		register_ready: in std_logic
 	);
 end NotEqualInstructionExecutor;
 
@@ -160,14 +151,16 @@ begin
 						state <= complete;
 
 					when complete =>
-						instruction_ready <= '1';
-						register_enable <= '0';
-						memory_enable <= '0';
+						if register_ready = '1' then
+							instruction_ready <= '1';
+						end if;
 						state <= complete;
 				end case;
 
 			else
 				instruction_ready <= '0';
+				register_enable <= '0';
+				memory_enable <= '0';
 				state <= fetch_arg0;
 			end if;
 		end if;

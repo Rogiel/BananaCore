@@ -73,16 +73,7 @@ entity AddInstructionExecutor is
 		register_enable: out std_logic := '0';
 
 		-- a flag indicating if a register operation has completed
-		register_ready: in std_logic;
-
-		------------------------------------------
-		-- IO ports
-		------------------------------------------
-		-- io port: port0
-		port0: in MemoryData;
-
-		-- io port: port1
-		port1: out MemoryData := (others => '0')
+		register_ready: in std_logic
 	);
 end AddInstructionExecutor;
 
@@ -124,7 +115,7 @@ begin
 							arg0 <= register_data_read;
 							register_enable <= '0';
 							state <= fetch_arg1;
-						else 
+						else
 							state <= store_arg0;
 						end if;
 
@@ -139,7 +130,7 @@ begin
 							arg1 <= register_data_read;
 							register_enable <= '0';
 							state <= execute;
-						else 
+						else
 							state <= store_arg1;
 						end if;
 
