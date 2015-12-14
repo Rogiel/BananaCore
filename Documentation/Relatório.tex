@@ -127,8 +127,6 @@ Inicialmente, pretendíamos implementar o acesso global a memória por via de um
 
 A solução desde problema, embora não seja ideal, foi simples: um grande MUX foi implementado de forma a fazer o "controle" de acesso ao barramento principal. Esta solução tem um grave problema: a necessidade de escrever código cresce muito em função da quantidade de instruções implementadas. Para um processador simples como o BananaCore isto pode não ser um problema muito relevante. Para implementações maiores, porém, isto pode ganhar uma faceta muito mais adversa. Como forma de solucionar, parcialmente, este empecilho, fizemos uso de artefatos de geração de código para gerar os muxes e demais condições do decodificador de instruções (ver seção \ref{sec:CodeGeneration}).
 
-\todo{Detalhar a implementação atual}
-
 \section{Exemplo de funcionamento}
 
 Os bits correspondentes ao programa são definidos na memória inicial no endereço $0$. Ao inicializar o processador, o \textbf{InstructionController} (seção \ref{sec:InstructionController}) é responsável por carregar os primeiros 4 bytes de dados da memória. Após o carregamento inicial, o controlador é responsável por decodificar o opcode\footnote{Opcode é o código de instrução, um código de 8 bits que dá "nome" a cada instrução do processador} e extrair cada argumento das instruções. Estes dados são salvos em um flip-flop para uso posterior.
@@ -223,8 +221,6 @@ A especificação final para o nosso projeto consiste em um processador de arqui
 	\item Operações bit-a-bit: AND, NAND, OR, NOR, XOR e NOT
 \end{itemize}
 
-\todo{Escrever sobre os registradores}
-
 \chapter{Testes}
 \todo{Escrever capítulo de testes}
 
@@ -266,6 +262,11 @@ Uma futura melhoria interessante é a adição de interrupções por timers e ex
 \chapter{Conclusão}
 \todo{Escrever capítulo de conclusão}
 
-O processador é, dos componentes de um computador ou sistema digital, o componente mais caro e complexo. Trata-se de uma poderosa máquina de calcular.Tendo em vista sua função e complexidade, conclui-se que como projeto de conclusão de disciplina um processador é um elemento extremamente adequado, abordando grande parte dos conceitos estudados durante o semestre.
+Com este projeto pudemos adquirir conhecimentos sobre o projeto de um processador da arquitetura do tipo Von Neumann e experimentar formas de implementar o processador. Também adquirimos experiência na descrição de hardware digital em VHDL. Mais importante, pudemos constatar que a arquitetura escolhida, embora faça sentido ao iniciar o projeto, não foi a melhor escolha possível, visto que obtivemos baixa performance e alto \emph{overhead} ao executar as instruções.
 
+Em especial, a escolha de implementar instruções com base em \emph{executors} não foi ideal, uma vez que abstrai muito a implementação física do hardware. Atribuímos este erro à falta de experiência -- nunca havíamos projetado um processador e a tarefa parece ser mais árdua do que aparenta.
+
+Outro problema constatado após a implementado, foi a adoção de um barramento de registrador que provoca um atraso grande no processamento e impossibilita (ou ao menos dificulta bastante) a implementação de um pipeline de execução. Uma alternativa mais eficiente seria a conexão direta dos sinais de entrada, saída e controle de cada registrador diretamente aos operadores, sem a utilização de uma camada de indireção. Pelos resultados obtidos da simulação, tal implementação acarretaria num redução de até 60\% no número de ciclos por instrução para instruções com 2 argumentos registrados.
+
+De forma geral, a especificação do conjunto de instruções esteja boa. O conjunto permite a execução de várias tarefas ainda que haja limitações no tipo de tarefas, como um pequeno e simples processador, acreditamos que a tarefa foi concluída de forma satisfatória.
 \end{document}
