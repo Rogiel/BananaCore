@@ -100,6 +100,14 @@ O memory bank é uma entidade simples e serve como uma abstração para um módu
 \section{Controlador de Registrador}
 Para evitar que fosse necessário injetar um grande número de sinais de acesso a dados, controle e status dos registradores, uma abstração semelhante ao acesso à memória foi criada para simplificar este desenvolvimento. Detalhes desta implementação serão omitidos, pois são muito semelhantes ao barramento de memória.
 
+Há 16 registradores no processador, onde 14 são de propósito geral, um acumulador e um registrador de controle. Cada registrador é dado um nome, de 0 a 15, normalmente representado em forma binária de \texttt{0b0000} até \texttt{0b1111}.
+
+\begin{description}[style=multiline,topsep=10pt,leftmargin=3.2cm]
+	\item[0b0000--0b1101] Propósito geral
+	\item[0b1110] Acumulador
+	\item[0b1111] Controle
+\end{description}
+
 \section{Controlador de Instruções}
 \label{sec:InstructionController}
 O controlador de instruções é, sem dúvida, uma das partes com maior quantidade de código descrevendo hardware; isto se dá devido a uma dificuldade que encontramos ao implementar um barramento único de acesso à memória e aos registradores.
@@ -204,7 +212,6 @@ Ao iniciar a execução da instrução, o executor imediatamente escreve no regi
 Para gerar os códigos repetitivos e forma algorítmica, fizemos usos de duas ferramentas distintas: Cog\footnote{Cog é um aplicativo que executa programas Python contidos em comentários do código fonte e substitui sua saída ao final da execução. O programa está disponível publicamente \mbox{em \url{http://nedbatchelder.com/code/cog/}}} e um script personalizado de geração de executores de instruções.
 
 Mais detalhes da geração de código podem ser extraídas do código fonte do projeto disponível no GitHub.
-
 
 \section{Especificação final}
 A especificação final para o nosso projeto consiste em um processador de arquitetura do tipo Von Neumann\footnote{A arquitetura Von Neumann consiste em uma única memória compartilhada tanto para dados como para programas.} de 16 bits com instruções básicas do tipo:
