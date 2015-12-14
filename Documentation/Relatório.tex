@@ -52,9 +52,9 @@
 \tableofcontents
 
 \chapter{Introdução}
-\todo{Escrever capítulo de introdução}
 
 O presente projeto versa sobre o processador BananaCore, desenvolvido como trabalho final da disciplina ENG04461 - Sistemas Digitais. Faz-se importante ressaltar que nosso processador foi desenvolvido com fins didáticos, não tentando priorizar desempenho ótimo.
+Esse projeto tem um valor didático ainda maior para nós pois além de nos fazer trabalhar com a matéria de Sistemas Digitais e a linguagem de descrição VHDL, fez com que tenhamos ainda mais domínio sobre o conteúdo de Microcontroladores, que é uma área de grande importância para engenheiros eletricistas, mas que infelizmente o currículo de nosso curso não dá muita ênfase.
 
 \chapter{Especificação}
 
@@ -91,7 +91,7 @@ O controlador é operado utilizando $7$ sinais:
 Para ler um byte da memória RAM, primeiramente seleciona-se o endereço desejado e atribui-se este valor ao barramento de endereços. Em seguida, o bit de operação é definido em modo leitura e aguarda-se um número arbitrário de clocks até que o sinal de pronto transicione para nível alto. No instante em que este sinal transiciona, o dado já está disponível na porta de leitura.
 
 \subsection{Escrita na memória RAM}
-Para escrever um byte na memória RAM, primeiramente seleciona-se o endereço desejado e atribui-se este valor ao barramento de endereços. Em seguida, no barramento de escrita de dados, o valor do byte é atribuido e o bit de operaçao é definido para uma operação do tipo \emph{WRITE}. Devido ao fato da memória RAM possuir um clock diferenciado do processador central, é necessário aguardar um intervalo arbitrário de ciclos de clock até que o sinal de pronto seja colocado em alto. Neste momento, já é possível iniciar a escrita do próximo byte da mesma maneira.
+Para escrever um byte na memória RAM, primeiramente seleciona-se o endereço desejado e atribui-se este valor ao barramento de endereços. Em seguida, no barramento de escrita de dados, o valor do byte é atribuido e o bit de operação é definido para uma operação do tipo \emph{WRITE}. Devido ao fato da memória RAM possuir um clock diferenciado do processador central, é necessário aguardar um intervalo arbitrário de ciclos de clock até que o sinal de pronto seja colocado em alto. Neste momento, já é possível iniciar a escrita do próximo byte da mesma maneira.
 
 \subsection{Memory Bank}
 \label{sec:MemoryBank}
@@ -105,7 +105,8 @@ Para evitar que fosse necessário injetar um grande número de sinais de acesso 
 O controlador de instruções é, sem dúvida, uma das partes com maior quantidade de código descrevendo hardware; isto se dá devido a uma dificuldade que encontramos ao implementar um barramento único de acesso à memória e aos registradores.
 
 \subsection{Decodificador de instruções}
-\todo{Detalhar a implementação atual}
+\label{sec:InstructionDecoder}
+A função do 
 
 \subsection{Executor de instruções}
 \label{sec:InstructionExecutor}
