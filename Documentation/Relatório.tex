@@ -4,18 +4,51 @@
 \usepackage[portuguese]{babel}
 \usepackage{todonotes}
 \usepackage{url}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{soul}
+\usepackage{hyperref}
+\usepackage{titling}
 
 \begin{document}
-\title{BananaCore - Processador em VHDL}
+\title{\textbf{BananaCore}\\{\LARGE Processador em VHDL}}
 \author{
-  Rogiel Sulzbach\\
+  Rogiel Sulzbach
   \and
-  Jefferson Johner\\
+  Jefferson Johner
   \and
-  Matheus Oliveira\\
+  Matheus Oliveira
 }
+\date{\today}
 
-\maketitle
+\begin{titlepage} \center
+	{
+		UNIVERSIDADE FEDERAL DO RIO GRANDE DO SUL\\
+		ESCOLA DE ENGENHARIA\\
+		DEPARTAMENTO DE ENGENHARIA ELÉTRICA\\
+		SISTEMAS DIGITAIS
+	}
+	
+	\vfill
+	
+	{\Huge
+		\thetitle
+	}
+	
+	\vfill
+	
+	{\Large
+		\theauthor
+	}
+	
+	\vfill
+	
+	{\small
+		\thedate
+	}
+\end{titlepage}
+
 \tableofcontents
 
 \chapter{Introdução}
@@ -87,6 +120,84 @@ A solução desde problema, embora não seja ideal, foi simples: um grande MUX f
 
 \todo{Detalhar a implementação atual}
 
+\section{Exemplo de funcionamento}
+
+Os bits correspondentes ao programa são definidos na memória inicial no endereço $0$. Ao inicializar o processador, o \textbf{InstructionController} (seção \ref{sec:InstructionController}) é responsável por carregar os primeiros 4 bytes de dados da memória. Após o carregamento inicial, o controlador é responsável por decodificar o opcode\footnote{Opcode é o código de instrução, um código de 8 bits que dá "nome" a cada instrução do processador} e extrair cada argumento das instruções. Estes dados são salvos em um flip-flop para uso posterior.
+
+No próximo estágio, o \textbf{InstructionExecutor} (seção \ref{sec:InstructionExecutor}) correspondente a instrução decodificada é ativado. Nele, os argumentos da instrução são passados e a execução da instrução começa. Cada instrução tem um comportamento diferente: instruções que dependem de dados registrados, primeiramente carregam seus registradores um a um. Instruções que armazenam a saída em algum registrador, fazem o armazenamento ao final da execução.
+
+Ao final da execução da instrução, uma flag de pronto é levantada e o InstructionController continua com a execução da próxima instrução na memória (repetindo o processo especificado acima).
+
+Para simplificar o entendimento do processador, utilizaremos um programa simples utilizado para os testes do processador. O programa faz o cálculo da operação de fatorial utilizando o seguinte programa:
+
+\begin{lstlisting}[language=C++,caption={Exemplo de código utilizado pelo Assembler},stepnumber=1,numbers=left,showlines=true]
+Assembler::Assembler(memoryStore)
+	.readIO(REGISTER_0)
+	.loadConstant(REGISTER_1, 0)
+	.loadConstant(REGISTER_2, 1)
+	.loadConstant(REGISTER_3, 1)
+
+	.mark(loopAddress)
+
+	.multiply(REGISTER_2, REGISTER_0)
+	.loadRegister(REGISTER_2, REGISTER_ACCUMULATOR)
+
+	.subtract(REGISTER_0, REGISTER_3)
+	.loadRegister(REGISTER_0, REGISTER_ACCUMULATOR)
+
+	.notEqual(REGISTER_0, REGISTER_1)
+	.jumpIfCarry(loopAddress)
+
+	.writeIO(REGISTER_2)
+
+	.jump(0);
+\end{lstlisting}
+
+O programa completo montado, em notação binária, é expresso abaixo:
+
+\begin{lstlisting}[breakatwhitespace=true,breakindent=0em,breaklines=true]
+00000011 00000000 00000000 00100001 00000000 00000000 00000000 00100010 00000000 00000001 00000000 00100011 00000000 00000001 00010010 00100000 00000000 00000010 00001110 00010001 00000011 00000000 00000000 00001110 00110101 00000001 00100010 00000000 00001110 00000010 00100000 00100000 00000000 00000000 
+\end{lstlisting}
+
+No exemplo anterior, o \emph{assembler} feito em C++ foi usado para gerar um código binário para o processador. Este é um algoritmo muito simples para cálculo de fatorial.
+
+Primeiramente, o processador carrega os primeiros 4 bytes da memória; estes bytes correspondem a:
+
+\begin{lstlisting}
+00000011 00000000 00000000 00100001
+\end{lstlisting}
+
+O decodificador extrai os seguintes parâmetros:
+\begin{description}[style=multiline,topsep=10pt,leftmargin=5cm]
+	\item[Opcode] \texttt{00000011} (READ\_IO)
+	\item[Argumento 0] \texttt{\st{0000}\textbf{0000}}
+\end{description}
+
+Nesta instrução (de acordo com a documentação, ver seção \ref{ch:Instruction documentation}), os primeiros 4 bits do argumento 0 são ignorados. E os últimos 4 bits são correspondentes ao registrador de destino em que o conteúdo da porta externa deve ser copiado para. O decodificador também armazena o tamanho correspondente a instrução, neste caso, 2 bytes.
+
+Após decodificado, o próximo estágio para para a ativação do executor da instrução, em que um bit interno é setado e a máquina de estados inteira da instrução inicia a execução.
+
+Para esta instrução, o conteúdo da porta de entrada é primeiramente lido para um registrador interno e, no próximo ciclo e movido para o registrador 0000 de acordo com o argumento da instrução.
+
+Ao final da execução, o registrador interno chamado \textbf{program counter} é incrementado o valor correspondente ao tamanho da instrução atual (isto é, pula para o endereço $2$) onde a próxima instrução a ser executada se encontra.
+
+O próximo ciclo de execução executa o seguinte bloco de memória:
+\begin{lstlisting}
+00000000 00100001 00000000 00000000
+\end{lstlisting}
+
+O decodificador extrai os seguintes parâmetros:
+\begin{description}[style=multiline,topsep=10pt,leftmargin=5cm]
+	\item[Opcode] \texttt{00000000} (LOAD)
+	\item[Argumento 0] \texttt{0010}
+	\item[Argumento 1] \texttt{0001}
+	\item[Argumento 2] \texttt{00000000 00000000}
+\end{description}
+
+No argumento 0, o tipo de LOAD é especificado. De acordo com a documentação (ver seção \ref{ch:Instruction documentation}), o tipo 0010 corresponde ao carregamento de uma constante. No argumento 1, o registrador de destino é especificado e no argumento 2 a constante de 16-bits a ser carregada é especificada.
+
+Ao iniciar a execução da instrução, o executor imediatamente escreve no registrador \texttt{0001} o valor \texttt{00000000 00000000} e assim que completado, o controlador de instruções procede para a próxima instrução.
+
 \section{Geração de código}
 \label{sec:CodeGeneration}
 Para gerar os códigos repetitivos e forma algorítmica, fizemos usos de duas ferramentas distintas: Cog\footnote{Cog é um aplicativo que executa programas Python contidos em comentários do código fonte e substitui sua saída ao final da execução. O programa está disponível publicamente \mbox{em \url{http://nedbatchelder.com/code/cog/}}} e um script personalizado de geração de executores de instruções.
@@ -108,6 +219,22 @@ A especificação final para o nosso projeto consiste em um processador de arqui
 
 \chapter{Testes}
 \todo{Escrever capítulo de testes}
+
+\chapter{Código desenvolvido}
+\label{ch:Instruction documentation}
+Todo código VHDL, C++ e Python desenvolvido para este projeto está disponível livremente no GitHub.
+
+\begin{description}
+	\item[BananaCore] \url{https://github.com/Rogiel/BananaCore}
+	\begin{description}
+		\item[Documentação das instruções] \url{https://github.com/Rogiel/BananaCore/blob/master/Documentation/Instruction%20Set.md}
+	\end{description}
+	
+	\item[BananaVM] \url{https://github.com/Rogiel/BananaVM}
+	\begin{description}
+		\item[Assembler] \url{https://github.com/Rogiel/BananaVM/tree/master/Source/BananaVM/Assembler}
+	\end{description}
+\end{description}
 
 \chapter{Melhoramentos futuros}
 \section*{Tempos de espera redundantes}
