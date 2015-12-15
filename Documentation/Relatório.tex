@@ -2,6 +2,7 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[portuguese]{babel}
+\usepackage[a4paper]{geometry}
 \usepackage{todonotes}
 \usepackage{url}
 \usepackage{xcolor}
@@ -11,6 +12,7 @@
 \usepackage{hyperref}
 \usepackage{titling}
 \usepackage{graphicx}
+
 \graphicspath{ {images/} }
 
 \begin{document}
@@ -229,9 +231,15 @@ A especificação final para o nosso projeto consiste em um processador de arqui
 Após a compilação do projeto realizamos testes com vetores de simulação para termos uma melhor visualização de como nosso processador executa suas operações, abaixo seguem alguns screenshots da simulação que julgamos importantes de serem compartilhados.
 
 \section{Controlador de memória}
-Nessa imagem é fácil de entender como funciona o controlador de memória do processador (ver seção \ref{sec:MemoryRead}). Na marca de 175ns um endereço de memória é fixado na entrada do controlador, após 1 ciclo de clock esse dado fica disponível na saída e a flag de memória pronta é levantada, no clock seguinte a memória e lida por fim a flag de memória pronta é baixada, um novo endereço é dado ao controlador de memória e o ciclo se repete.
+
+\includegraphics[width=\textwidth]{memory_controller}
+
+Nessa imagem é fácil de entender como funciona o controlador de memória do processador (ver seção \ref{sec:MemoryAccess}). Na marca de 175ns um endereço de memória é fixado na entrada do controlador, após 1 ciclo de clock esse dado fica disponível na saída e a flag de memória pronta é levantada, no clock seguinte a memória e lida por fim a flag de memória pronta é baixada, um novo endereço é dado ao controlador de memória e o ciclo se repete.
 
 \section{Instrução LOAD}
+
+\includegraphics[width=\textwidth]{load}
+
 Nessa imagem é fica claro o funcionamento da instrução LOAD para carregar dados nos registradores. Analisando o acréscimo do Program Counter percebe-se que essa instrução é executada 3 vezes entre as marcas de 1.28us e 4.48us
 Nas 3 execuções dessa instrução o último argumento é 0000, o que indica que esta sendo feito o carregamento de um constante (indicada pelo primeiro argumento) em um registrador (indicado pelo terceiro argumento).
 Em sua primeira execução o primeiro argumento é 0 e o terceiro é 1, o que indica que está sendo carregada a constante 0 no registrador 1, fato que pode ser comprovado ao analisar a alteração no dado do registrador 1.
@@ -240,9 +248,16 @@ Em sua terceira execução o primeiro argumento é 1 e o terceiro é 3, o que in
 Nesse intervalo estudado, a função LOAD carrega o registrador 1 com o valor 0 e os registradores 2 e 3 com o valor 1, como é dito no exemplo mostrado antes nesse relatório e pode ser percebido ao avaliar o valor dos registradores após o instante 4.16us.
 
 \section{Instruções MULTIPLY}
+
+\includegraphics[width=\textwidth]{multiply}
+
 Nessa imagem percebe-se o funcionamento da instrução MULTIPLY. Nessa instrução o valor armazenado no registrador referente ao segundo argumento é multiplicado com o valor do registrador do terceiro argumento e esse resultado é armazenado no registrador especial ACC. 
 Percebe-se que os argumentos dados são 2 e 0, assim essa instrução deve multiplicar os valores armazenados nos registradores 0 e 2 e salvar esse resultado no registrador ACC. O êxito da função é notado pela alteração do valor no registrador ACC para 6 no instante 18.24us
+
 \section{Instrução NOT EQUAL}
+
+\includegraphics[width=\textwidth]{not_equal}
+
 Nessa imagem o funcionamento da função NOT EQUAL fica bastante claro. Essa instrução compara os valores nos registradores indicados nos argumentos 2 e 3 e caso não sejam iguais seta o valor 1 no registrador especial.
 Os argumentos dados para a função são 0 e 1, o que indica que os valores a serem comparados são os dos registradores 0 e 1. A função parece funcionar corretamente pois, após avaliar que os dois valores são iguais, seta o registrador especial para 0, no instante 23.36us.
 \section*{Mais informações}
