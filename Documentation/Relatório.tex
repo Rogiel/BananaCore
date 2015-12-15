@@ -81,7 +81,7 @@ Sabendo da limitação desta implementação, o design deve permitir que seja f�
 \label{sec:MemoryController}
 O controlador de memória é a unidade que faz o intermédio ao acesso a memória do processador.Nele, a operação de escrita é validada e então enviada para um respectivo memory bank (ver seção \ref{sec:MemoryBank}).
 
-O controlador é operado utilizando $7$ sinais:
+O controlador é operado utilizando $5$ sinais:
 
 \begin{description}
 	\item[Endereço (entrada)] Recebe um valor de 16 bits que representa o endereço que memória que se deseja operar
@@ -119,6 +119,7 @@ O controlador de instruções é, sem dúvida, uma das partes com maior quantida
 
 \subsection{Decodificador de instruções}
 \label{sec:InstructionDecoder}
+\todo{Escrever seção do decodificador de instruções}
 A função do 
 
 \subsection{Executor de instruções}
@@ -301,8 +302,6 @@ Se possível na placa de desenvolvimento, a criação de um controlador de clock
 Uma futura melhoria interessante é a adição de interrupções por timers e externas.
 
 \chapter{Conclusão}
-\todo{Escrever capítulo de conclusão}
-
 Com este projeto pudemos adquirir conhecimentos sobre o projeto de um processador da arquitetura do tipo Von Neumann e experimentar formas de implementar o processador. Também adquirimos experiência na descrição de hardware digital em VHDL. Mais importante, pudemos constatar que a arquitetura escolhida, embora faça sentido ao iniciar o projeto, não foi a melhor escolha possível, visto que obtivemos baixa performance e alto \emph{overhead} ao executar as instruções.
 
 Em especial, a escolha de implementar instruções com base em \emph{executors} não foi ideal, uma vez que abstrai muito a implementação física do hardware. Atribuímos este erro à falta de experiência -- nunca havíamos projetado um processador e a tarefa parece ser mais árdua do que aparenta.
